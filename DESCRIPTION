@@ -1,0 +1,13 @@
+Package: rita
+Type: Package
+Title: Incidence Estimation Using Recency Assays
+Version: 0.1.0
+Author: Ian E. Fellows
+Maintainer: Ian E. Fellows <ian@fellstat.com>
+Description: Provides functions and methods to estimate incidence from a cross-sectional survey. A Recent Infection Testing Algorithm (RITA) is used to identify likely recent infections and the methods of Fellows (2021) are used to calculate incidence based on the frequency of these likely recent infections.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
