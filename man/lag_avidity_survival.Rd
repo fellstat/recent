@@ -4,7 +4,7 @@
 \alias{lag_avidity_survival}
 \title{Survival curve for testing recent}
 \usage{
-lag_avidity_survival()
+lag_avidity_survival(n = 365 * 5)
 }
 \value{
 A vector where the ith element is the probability that an untreated non-elite controller

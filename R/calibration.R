@@ -34,8 +34,8 @@ lag_avidity_frr <- function(){
 #' @references
 #' Yen T Duong, Reshma Kassanjee, Alex Welte, Meade Morgan, Anindya De, TrudyDobbs, Erin Rottinghaus, John Nkengasong, Marcel E Curlin, Chonticha Kitti-nunvorakoon,  et  al.   Recalibration  of  the  limiting  antigen  avidity  eia  to  deter-mine mean duration of recent infection in divergent hiv-1 subtypes.PloS  one,10(2):e0114947, 2015.
 #' @export
-lag_avidity_survival <- function(){
-  structure(c(0.963137666201887, 0.962021320449555, 0.96087261491624,
+lag_avidity_survival <- function(n=365*5){
+  s <- structure(c(0.963137666201887, 0.962021320449555, 0.96087261491624,
               0.959690736193394, 0.958474858081183, 0.957224141853411, 0.955937736557767,
               0.954614779353037, 0.953254395884926, 0.95185570070215, 0.950417797714457,
               0.948939780694213, 0.947420733823218, 0.945859732286333, 0.944255842913532,
@@ -544,4 +544,7 @@ lag_avidity_survival <- function(){
               0.0112525838047983, 0.0112648834843799, 0.0112772547334215, 0.0112896973031301,
               0.0113022109440402, 0.0113147954059915, 0.011327450438106, 0.0113401757887649
   ), .Dim = 1825L)
+  if(n > length(s))
+    stop("n is larger than 5 * 365")
+  s[1:n]
 }

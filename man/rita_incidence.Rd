@@ -9,15 +9,14 @@ rita_incidence(
   undiagnosed,
   elite_cntr,
   hiv,
-  weights,
-  tslt = NULL,
-  ever_hiv_test = NULL,
+  tslt,
+  ever_hiv_test,
+  weights = rep(1, length(recent)),
   diag_surv = NULL,
-  tau = 2 * 365,
+  tau = 2,
   frr = lag_avidity_frr()[1],
-  frr_se = lag_avidity_frr()[2],
-  assay_surv = lag_avidity_survival(),
-  aids_surv = aids_survival(tau)
+  assay_surv = lag_avidity_survival(tau * 365),
+  aids_surv = aids_survival(tau * 365)
 )
 }
 \arguments{
@@ -29,19 +28,17 @@ rita_incidence(
 
 \item{hiv}{Logical. Is HIV positive}
 
-\item{weights}{Survey weights}
-
 \item{tslt}{Time since last HIV test}
 
 \item{ever_hiv_test}{Subject has been tested for HIV in the past}
+
+\item{weights}{Survey weights}
 
 \item{diag_surv}{time to diagnosis survival function vector}
 
 \item{tau}{long term cut-off}
 
 \item{frr}{False recency rate among treatment naive non-elite controller non-AIDS individuals}
-
-\item{frr_se}{Standard error of FRR}
 
 \item{assay_surv}{Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals}
 
