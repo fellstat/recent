@@ -1,4 +1,30 @@
 
+#' AIDS survival probability curve
+#' @param n Number of days to calculate
+#' @returns
+#' A vector where the ith element is the probability that an
+#' individual infected with HIV i days ago has not progressed to AIDS.
+#' @references
+#' Ron Brookmeyer and James J Goedert.  Censoring in an epidemic with an appli-cation to hemophilia-associated aids.Biometrics, pages 325–335, 1989.
+#'
+#' @export
+aids_survival <- function(n=365*5){
+  aids_surv <- 1-sapply(1:n, function(x) stats::pweibull(x/365, 2.516, 1 / 0.086))
+}
+
+#' False Recency Rate (FRR) for the LAg-Avidity
+#' @returns
+#' A vector of length 2. The first element is the proportion of untreated, non-elite controller, non-AIDS individuals infected more
+#' than 2 years ago that test as recent on the LAg-Avidity assay. The second is the standard
+#' error of the proportion.
+#' @export
+lag_avidity_frr <- function(){
+  c(
+    proportion = 2 / 362,
+    std_error = sqrt((2 / 362) * (1-2 / 362) / 362)
+  )
+}
+
 #' Survival curve for testing recent
 #' @details
 #' A reanalysis of Duong et. al. (2015). See Fellows (2021) for details
@@ -7,7 +33,7 @@
 #' individual infected i days ago tests recent on the LAg-Avidity assay.
 #' @references
 #' Yen T Duong, Reshma Kassanjee, Alex Welte, Meade Morgan, Anindya De, TrudyDobbs, Erin Rottinghaus, John Nkengasong, Marcel E Curlin, Chonticha Kitti-nunvorakoon,  et  al.   Recalibration  of  the  limiting  antigen  avidity  eia  to  deter-mine mean duration of recent infection in divergent hiv-1 subtypes.PloS  one,10(2):e0114947, 2015.
-#'
+#' @export
 lag_avidity_survival <- function(){
   structure(c(0.963137666201887, 0.962021320449555, 0.96087261491624,
               0.959690736193394, 0.958474858081183, 0.957224141853411, 0.955937736557767,
