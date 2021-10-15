@@ -7,7 +7,7 @@
 aids_survival(n = 365 * 5)
 }
 \arguments{
-\item{n}{Number of days to calculate}
+\item{n}{Number of days to calculate.}
 }
 \value{
 A vector where the ith element is the probability that an

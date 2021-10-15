@@ -1,17 +1,17 @@
 
 
 #' Assay Based Incidence Estimation
-#' @param recent Logical. Tests recent on assay
-#' @param undiagnosed Logical. No previous diagnosis
-#' @param elite_cntr Logical. Is an elite controller (VL < 1000)
-#' @param hiv Logical. Is HIV positive
-#' @param weights Survey weights
-#' @param tslt Time since last HIV test
-#' @param ever_hiv_test Subject has been tested for HIV in the past
-#' @param diag_surv time to diagnosis survival function vector
-#' @param tau long term cut-off
-#' @param frr False recency rate among treatment naive non-elite controller non-AIDS individuals
-#' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals
+#' @param recent Logical. Tests recent on assay.
+#' @param undiagnosed Logical. No previous diagnosis.
+#' @param elite_cntr Logical. Is an elite controller (VL < 1000).
+#' @param hiv Logical. Is HIV positive.
+#' @param weights Survey weights.
+#' @param tslt Time since last HIV test.
+#' @param ever_hiv_test Subject has been tested for HIV in the past.
+#' @param diag_surv time to diagnosis survival function vector.
+#' @param tau long term cut-off (Years).
+#' @param frr False recency rate among treatment naive non-elite controller non-AIDS individuals.
+#' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
 #' @param aids_surv Survival function vector for time to AIDS in untreated individuals.
 #' @export
 rita_incidence <- function(
@@ -62,7 +62,7 @@ rita_incidence <- function(
     (phiv - tau  * lambda * (1-phiv))
 
   data.frame(
-    lambda = lambda,
+    incidence = lambda,
     rita_frr = rita_frr,
     omega = omega ,
     omega_s = omega_s,
@@ -75,6 +75,24 @@ rita_incidence <- function(
 
 
 #' Survey bootstrap
+#' @param recent Logical. Tests recent on assay.
+#' @param undiagnosed Logical. No previous diagnosis.
+#' @param elite_cntr Logical. Is an elite controller (VL < 1000).
+#' @param hiv Logical. Is HIV positive.
+#' @param weights Survey weights.
+#' @param tslt Time since last HIV test.
+#' @param ever_hiv_test Subject has been tested for HIV in the past.
+#' @param diag_surv time to diagnosis survival function vector.
+#' @param tau long term cut-off (Years).
+#' @param frr False recency rate among treatment naive non-elite controller non-AIDS individuals.
+#' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
+#' @param aids_surv Survival function vector for time to AIDS in untreated individuals.
+#' @param rep_weights A data.frame of replicate weights. See survey::svrrepdesign
+#' @param rep_weight_type The type of resampling weights. See svrepdesign.
+#' @param combined_weights TRUE if the rep_weights already include the sampling weights. This is usually the case.
+#' @param conf_level confidence level for bootstrap interval.
+#' @param show_progress If TRUE, prints bootstrap progress. This may also be a callback function taking one parameter equal to the index of the current replicate.
+#' @param ... additional parameters to svrepdesign.
 #' @export
 rita_bootstrap <- function(
   recent,
@@ -92,6 +110,7 @@ rita_bootstrap <- function(
   frr = lag_avidity_frr()[1],
   assay_surv = lag_avidity_survival(tau * 365),
   aids_surv = aids_survival(tau * 365),
+  conf_level=.95,
   show_progress = TRUE,
   ...
 ){
@@ -136,17 +155,18 @@ rita_bootstrap <- function(
   scale <- rep_design$scale
   rscales <- rep_design$rscales
   mse <- rep_design$mse
-
   rep_weights <- weights(rep_design)
   nrep <- ncol(rep_weights)
 
   errors <- list()
   estimates <- array(NA, dim=c(nr, nc, nrep))
+  if(!is.function(show_progress) & show_progress)
+    prog_bar <- progress::progress_bar$new(total=nrep)
   for(i in 1:nrep){
     if(is.function(show_progress))
       show_progress(i)
     else if(show_progress)
-      cat(".")
+      prog_bar$tick()
     val <- try(fun(rep_weights[,i]))
     if(!inherits(val, "try-error"))
       estimates[,,i] <- val#fun(rep_weights[,i])
@@ -167,30 +187,17 @@ rita_bootstrap <- function(
              replicates=estimates,
              nrep=nrep,
              errors=errors)
-  class(bb) <- c("rita_boot_est","list")
-  bb
+  res <- .table_rita_boot_est(bb, conf_level = conf_level)
+  attr(res,"bootstraps") <- bb
+  res
 }
 
 
 
 
 
-#' print bootstrap
-#' @param x a inc_boot_est object
-#' @param ... additional parameters for summary.inc_boot_est
-#' @export
-print.rita_boot_est <- function(x, ...){
-  res <- summary(x,...)
-  print(res)
-}
-
-#' summary of incidence bootstrap
-#' @param object a inc_boot_est object
-#' @param conf_level confidence level for intervals
-#' @param ... additional parameters for print.data.frame
-#' @export
-summary.rita_boot_est <- function(object, conf_level=.95, ...){
-  cival <- qnorm(1 - (1 - conf_level) / 2)
+.table_rita_boot_est <- function(object, conf_level=.95, ...){
+  cival <- stats::qnorm(1 - (1 - conf_level) / 2)
   res <- as.data.frame(t(rbind(
     object$value,
     sqrt(object$var),
@@ -199,9 +206,11 @@ summary.rita_boot_est <- function(object, conf_level=.95, ...){
   )))
   colnames(res) <- c(
     "estimate",
-    "se",
-    paste0(100*conf_level," CI lower"),
-    paste0(100*conf_level," CI upper")
+    "std_error",
+    "lower_bound",
+    "upper_bound"
+    #paste0(100*conf_level,"% CI lower"),
+    #paste0(100*conf_level,"% CI upper")
   )
   res
 }

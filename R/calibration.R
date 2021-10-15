@@ -1,6 +1,6 @@
 
 #' AIDS survival probability curve
-#' @param n Number of days to calculate
+#' @param n Number of days to calculate.
 #' @returns
 #' A vector where the ith element is the probability that an
 #' individual infected with HIV i days ago has not progressed to AIDS.
@@ -26,6 +26,7 @@ lag_avidity_frr <- function(){
 }
 
 #' Survival curve for testing recent
+#' @param n Number of days to calculate.
 #' @details
 #' A reanalysis of Duong et. al. (2015). See Fellows (2021) for details
 #' @returns

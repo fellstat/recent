@@ -20,9 +20,47 @@ rita_bootstrap(
   frr = lag_avidity_frr()[1],
   assay_surv = lag_avidity_survival(tau * 365),
   aids_surv = aids_survival(tau * 365),
+  conf_level = 0.95,
   show_progress = TRUE,
   ...
 )
+}
+\arguments{
+\item{recent}{Logical. Tests recent on assay.}
+
+\item{undiagnosed}{Logical. No previous diagnosis.}
+
+\item{elite_cntr}{Logical. Is an elite controller (VL < 1000).}
+
+\item{hiv}{Logical. Is HIV positive.}
+
+\item{tslt}{Time since last HIV test.}
+
+\item{ever_hiv_test}{Subject has been tested for HIV in the past.}
+
+\item{weights}{Survey weights.}
+
+\item{rep_weights}{A data.frame of replicate weights. See survey::svrrepdesign}
+
+\item{rep_weight_type}{The type of resampling weights. See svrepdesign.}
+
+\item{combined_weights}{TRUE if the rep_weights already include the sampling weights. This is usually the case.}
+
+\item{diag_surv}{time to diagnosis survival function vector.}
+
+\item{tau}{long term cut-off (Years).}
+
+\item{frr}{False recency rate among treatment naive non-elite controller non-AIDS individuals.}
+
+\item{assay_surv}{Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.}
+
+\item{aids_surv}{Survival function vector for time to AIDS in untreated individuals.}
+
+\item{conf_level}{confidence level for bootstrap interval.}
+
+\item{show_progress}{If TRUE, prints bootstrap progress. This may also be a callback function taking one parameter equal to the index of the current replicate.}
+
+\item{...}{additional parameters to svrepdesign.}
 }
 \description{
 Survey bootstrap

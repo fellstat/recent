@@ -6,6 +6,9 @@
 \usage{
 lag_avidity_survival(n = 365 * 5)
 }
+\arguments{
+\item{n}{Number of days to calculate.}
+}
 \value{
 A vector where the ith element is the probability that an untreated non-elite controller
 individual infected i days ago tests recent on the LAg-Avidity assay.

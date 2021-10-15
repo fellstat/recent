@@ -35,7 +35,7 @@ test_that("rita_incidence", {
 
 test_that("rita_bootstrap", {
   data("assay_data")
-  ri <- rita_bootstrap(
+  expect_warning(ri <- rita_bootstrap(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
     elite_cntr=assay_data$elite_cntr,
@@ -44,8 +44,8 @@ test_that("rita_bootstrap", {
     tslt=assay_data$tslt,
     ever_hiv_test=assay_data$ever_hiv_test,
     rep_weights = assay_data %>% dplyr::select(contains("btwt")),
-    rep_weight_type = "JK2"
-  )
-                                                                                                     -1L))
-  #expect_true(sum(abs(ri - ri_ref))<.000001)
+    rep_weight_type = "JK2",
+    show_progress = FALSE
+  ))
+#expect_true(sum(abs(ri - ri_ref))<.000001)
 })
