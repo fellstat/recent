@@ -6,13 +6,13 @@
 #' @param elite_cntr Logical. Is an elite controller (VL < 1000).
 #' @param hiv Logical. Is HIV positive.
 #' @param weights Survey weights.
-#' @param tslt Time since last HIV test.
+#' @param tslt Time since last HIV test (days).
 #' @param ever_hiv_test Subject has been tested for HIV in the past.
-#' @param diag_surv time to diagnosis survival function vector.
-#' @param tau long term cut-off (Years).
-#' @param frr False recency rate among treatment naive non-elite controller non-AIDS individuals.
+#' @param tau long term cut-off (years).
+#' @param frr Reference false recency rate among treatment naive non-elite controller non-AIDS individuals.
+#' @param test_history_population If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
-#' @param aids_surv Survival function vector for time to AIDS in untreated individuals.
+#' @param diag_surv time to diagnosis survival function vector. If specified, overrides the internal calculation.
 #' @export
 rita_incidence <- function(
   recent,
@@ -22,40 +22,47 @@ rita_incidence <- function(
   tslt,
   ever_hiv_test,
   weights = rep(1, length(recent)),
-  diag_surv = NULL,
   tau = 2,
   frr = lag_avidity_frr()[1],
+  test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
-  aids_surv = aids_survival(tau * 365)
+  diag_surv = NULL
 ){
+  test_history_population <- match.arg(test_history_population)
   tau_days <- tau * 365
-  if(is.null(diag_surv)){
-    if(is.null(tslt))
-      stop("tslt is required if diag_surv is not specified")
-    if(is.null(ever_hiv_test))
-      stop("ever_hiv_test is required if diag_surv is not specified")
-    diag_surv <- diagnosis_survival(undiagnosed, tslt, ever_hiv_test, weights, n=tau_days)
-  }
+
+  if(is.null(diag_surv))
+    diag_surv <- diagnosis_survival(
+      undiagnosed,
+      tslt,
+      ever_hiv_test,
+      hiv,
+      weights,
+      n=tau_days,
+      population = test_history_population
+    )
+
   frr <- as.vector(frr)
-  aid_surv <- aids_survival(tau_days)
+  aids_surv = aids_survival(tau * 365)
   omega_s <- sum(diag_surv[1:tau_days] * aids_surv[1:tau_days]) / 365
 
   omega <- sum(assay_surv[1:tau_days] * diag_surv[1:tau_days] * aids_surv[1:tau_days]) / 365
 
   screen_in <- undiagnosed * (!elite_cntr)
+  screen_in[!hiv] <- FALSE
 
   phiv <- sum(hiv * weights, na.rm=TRUE) /
-      sum((!is.na(hiv)) * weights)
+      sum(weights[!is.na(hiv)])
 
 
   pscreen <- sum(screen_in * weights, na.rm=TRUE) /
-      sum((!is.na(screen_in)) * weights)
+      sum(weights[!is.na(screen_in)])
 
   #precent_ghiv <- sum(recent * screen_in * hiv * weights, na.rm=TRUE) /
   #    sum((!is.na(recent * screen_in * hiv)) * hiv * weights)
 
   precent_gscreen <- sum(recent * screen_in * weights, na.rm=TRUE) /
-      sum((!is.na(recent * screen_in)) * screen_in * weights)
+      sum( (screen_in * weights)[!is.na(recent * screen_in)])
 
   lambda <- (precent_gscreen - frr) * pscreen / ((1-phiv) * (omega - frr * omega_s))
   rita_frr <- frr * (pscreen - omega_s * lambda * (1-phiv)) /
@@ -63,8 +70,8 @@ rita_incidence <- function(
 
   data.frame(
     incidence = lambda,
-    rita_frr = rita_frr,
-    omega = omega ,
+    residual_frr = rita_frr,
+    omega_rs = omega,
     omega_s = omega_s,
     `P(R|S)` = precent_gscreen,
     `P(S|H)` = pscreen / phiv,
@@ -80,13 +87,13 @@ rita_incidence <- function(
 #' @param elite_cntr Logical. Is an elite controller (VL < 1000).
 #' @param hiv Logical. Is HIV positive.
 #' @param weights Survey weights.
-#' @param tslt Time since last HIV test.
+#' @param tslt Time since last HIV test (days).
 #' @param ever_hiv_test Subject has been tested for HIV in the past.
-#' @param diag_surv time to diagnosis survival function vector.
-#' @param tau long term cut-off (Years).
+#' @param tau long term cut-off (years).
 #' @param frr False recency rate among treatment naive non-elite controller non-AIDS individuals.
+#' @param test_history_population If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
-#' @param aids_surv Survival function vector for time to AIDS in untreated individuals.
+#' @param diag_surv time to diagnosis survival function vector.
 #' @param rep_weights A data.frame of replicate weights. See survey::svrrepdesign
 #' @param rep_weight_type The type of resampling weights. See svrepdesign.
 #' @param combined_weights TRUE if the rep_weights already include the sampling weights. This is usually the case.
@@ -105,15 +112,16 @@ rita_bootstrap <- function(
   rep_weights = NULL,
   rep_weight_type=c("BRR", "Fay", "JK1","JK2","JKn","bootstrap","other"),
   combined_weights=TRUE,
-  diag_surv = NULL,
   tau = 2,
   frr = lag_avidity_frr()[1],
+  test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
-  aids_surv = aids_survival(tau * 365),
+  diag_surv = NULL,
   conf_level=.95,
   show_progress = TRUE,
   ...
 ){
+  test_history_population <- match.arg(test_history_population)
   fun <- function(wts){
     as.matrix(rita_incidence(
       recent=recent,
@@ -123,11 +131,11 @@ rita_bootstrap <- function(
       tslt=tslt,
       ever_hiv_test = ever_hiv_test,
       weights = wts,
-      diag_surv = diag_surv,
       tau = tau,
       frr = frr,
+      test_history_population = test_history_population,
       assay_surv = assay_surv,
-      aids_surv = aids_surv
+      diag_surv = diag_surv
     ))
   }
   values <- fun(weights)
@@ -173,8 +181,7 @@ rita_bootstrap <- function(
     else
       errors[[length(errors) + 1]] <- val
   }
-  if(!is.function(show_progress) && show_progress)
-    cat("\n")
+
   vars <- matrix(NA,nrow=nr,ncol=nc)
   for(i in 1:nr){
     for(j in 1:nc){
