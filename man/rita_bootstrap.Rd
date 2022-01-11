@@ -15,11 +15,11 @@ rita_bootstrap(
   rep_weights = NULL,
   rep_weight_type = c("BRR", "Fay", "JK1", "JK2", "JKn", "bootstrap", "other"),
   combined_weights = TRUE,
-  diag_surv = NULL,
   tau = 2,
   frr = lag_avidity_frr()[1],
+  test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
-  aids_surv = aids_survival(tau * 365),
+  diag_surv = NULL,
   conf_level = 0.95,
   show_progress = TRUE,
   ...
@@ -34,7 +34,7 @@ rita_bootstrap(
 
 \item{hiv}{Logical. Is HIV positive.}
 
-\item{tslt}{Time since last HIV test.}
+\item{tslt}{Time since last HIV test (days).}
 
 \item{ever_hiv_test}{Subject has been tested for HIV in the past.}
 
@@ -46,15 +46,15 @@ rita_bootstrap(
 
 \item{combined_weights}{TRUE if the rep_weights already include the sampling weights. This is usually the case.}
 
-\item{diag_surv}{time to diagnosis survival function vector.}
-
-\item{tau}{long term cut-off (Years).}
+\item{tau}{long term cut-off (years).}
 
 \item{frr}{False recency rate among treatment naive non-elite controller non-AIDS individuals.}
 
+\item{test_history_population}{If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.}
+
 \item{assay_surv}{Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.}
 
-\item{aids_surv}{Survival function vector for time to AIDS in untreated individuals.}
+\item{diag_surv}{time to diagnosis survival function vector.}
 
 \item{conf_level}{confidence level for bootstrap interval.}
 
@@ -62,6 +62,32 @@ rita_bootstrap(
 
 \item{...}{additional parameters to svrepdesign.}
 }
+\value{
+A data.frame with columns for the estimate, standard error, lower confidence bound and upper confidence bound.
+Rows are defined by:
+
+1. `incidence`: The incidence.
+2. `residual_frr`: The false recency rate accounting for the screening process.
+3. `omega_rs`: The mean duration of recency up to tau accounting for the screening process.
+4. `P(R|S)` : The proportion of screened in individual who test recent.
+5. `P(S|H)` : The proportion of HIV+ individuals that are screened in.
+6. `P(H)` : HIV prevalence.
+}
 \description{
 Survey bootstrap
+}
+\examples{
+data("assay_data")
+rep_weights <-  dplyr::select(assay_data, dplyr::contains("btwt"))
+rita_bootstrap(
+recent=assay_data$recent,
+undiagnosed=assay_data$undiagnosed,
+elite_cntr=assay_data$elite_cntr,
+hiv=assay_data$hiv,
+weights=assay_data$weights,
+tslt=assay_data$tslt,
+ever_hiv_test=assay_data$ever_hiv_test,
+rep_weights = rep_weights,
+rep_weight_type = "JK1"
+)
 }

@@ -13,6 +13,27 @@
 #' @param test_history_population If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
 #' @param diag_surv time to diagnosis survival function vector. If specified, overrides the internal calculation.
+#' @returns
+#' A data.frame with the following values:
+#'
+#' 1. `incidence`: The incidence.
+#' 2. `residual_frr`: The false recency rate accounting for the screening process.
+#' 3. `omega_rs`: The mean duration of recency up to tau accounting for the screening process.
+#' 4. `P(R|S)` : The proportion of screened in individual who test recent.
+#' 5. `P(S|H)` : The proportion of HIV+ individuals that are screened in.
+#' 6. `P(H)` : HIV prevalence.
+#'
+#' @examples
+#' data("assay_data")
+#' rita_incidence(
+#' recent=assay_data$recent,
+#' undiagnosed=assay_data$undiagnosed,
+#' elite_cntr=assay_data$elite_cntr,
+#' hiv=assay_data$hiv,
+#' weights=assay_data$weights,
+#' tslt=assay_data$tslt,
+#' ever_hiv_test=assay_data$ever_hiv_test
+#' )
 #' @export
 rita_incidence <- function(
   recent,
@@ -100,6 +121,30 @@ rita_incidence <- function(
 #' @param conf_level confidence level for bootstrap interval.
 #' @param show_progress If TRUE, prints bootstrap progress. This may also be a callback function taking one parameter equal to the index of the current replicate.
 #' @param ... additional parameters to svrepdesign.
+#' @returns
+#' A data.frame with columns for the estimate, standard error, lower confidence bound and upper confidence bound.
+#' Rows are defined by:
+#'
+#' 1. `incidence`: The incidence.
+#' 2. `residual_frr`: The false recency rate accounting for the screening process.
+#' 3. `omega_rs`: The mean duration of recency up to tau accounting for the screening process.
+#' 4. `P(R|S)` : The proportion of screened in individual who test recent.
+#' 5. `P(S|H)` : The proportion of HIV+ individuals that are screened in.
+#' 6. `P(H)` : HIV prevalence.
+#' @examples
+#' data("assay_data")
+#' rep_weights <-  dplyr::select(assay_data, dplyr::contains("btwt"))
+#' rita_bootstrap(
+#' recent=assay_data$recent,
+#' undiagnosed=assay_data$undiagnosed,
+#' elite_cntr=assay_data$elite_cntr,
+#' hiv=assay_data$hiv,
+#' weights=assay_data$weights,
+#' tslt=assay_data$tslt,
+#' ever_hiv_test=assay_data$ever_hiv_test,
+#' rep_weights = rep_weights,
+#' rep_weight_type = "JK1"
+#' )
 #' @export
 rita_bootstrap <- function(
   recent,
@@ -221,3 +266,4 @@ rita_bootstrap <- function(
   )
   res
 }
+

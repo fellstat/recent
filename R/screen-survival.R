@@ -37,8 +37,8 @@ diagnosis_survival <- function(
   }
   sub_pop[is.na(sub_pop)] <- FALSE
 
-  if(length(na.omit(tslt[sub_pop])) == 0 ||
-     length(na.omit(ever_hiv_test[sub_pop])) == 0)
+  if(length(stats::na.omit(tslt[sub_pop])) == 0 ||
+     length(stats::na.omit(ever_hiv_test[sub_pop])) == 0)
     stop("diagnosis_survival: no non-missing testing histories")
 
   tst_surv <- sapply(1:n, function(x){

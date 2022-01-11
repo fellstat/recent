@@ -4,7 +4,15 @@
 \alias{diagnosis_survival}
 \title{Survival probability for RITA Screening}
 \usage{
-diagnosis_survival(undiagnosed, tslt, ever_hiv_test, weights, n = 365 * 5)
+diagnosis_survival(
+  undiagnosed,
+  tslt,
+  ever_hiv_test,
+  hiv,
+  weights,
+  n = 365 * 5,
+  population = c("undiagnosed", "negative")
+)
 }
 \arguments{
 \item{undiagnosed}{A logical vector indicating if an individual has never been diagnosed as HIV+.}
@@ -13,9 +21,13 @@ diagnosis_survival(undiagnosed, tslt, ever_hiv_test, weights, n = 365 * 5)
 
 \item{ever_hiv_test}{A logical vector indicating whether an individual has ever had an HIV test}
 
+\item{hiv}{HIV positive status.}
+
 \item{weights}{Survey weights}
 
 \item{n}{Number of days to calculate}
+
+\item{population}{If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.}
 }
 \value{
 A vector where the ith element is the probability that an
@@ -23,4 +35,14 @@ individual infected i days ago has been diagnosed.
 }
 \description{
 Survival probability for RITA Screening
+}
+\examples{
+  data("assay_data")
+  diagnosis_survival(
+    assay_data$undiagnosed,
+    assay_data$tslt,
+    assay_data$ever_hiv_test,
+    assay_data$hiv,
+    assay_data$weights,
+    n=40)
 }
