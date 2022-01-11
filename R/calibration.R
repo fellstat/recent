@@ -1,4 +1,5 @@
 
+
 #' AIDS survival probability curve
 #' @param n Number of days to calculate.
 #' @returns
@@ -8,8 +9,10 @@
 #' Ron Brookmeyer and James J Goedert.  Censoring in an epidemic with an appli-cation to hemophilia-associated aids.Biometrics, pages 325–335, 1989.
 #'
 #' @export
-aids_survival <- function(n=365*5){
-  aids_surv <- 1-sapply(1:n, function(x) stats::pweibull(x/365, 2.516, 1 / 0.086))
+aids_survival <- function(n = 365 * 5) {
+  aids_surv <-
+    1 - sapply(1:n, function(x)
+      stats::pweibull(x / 365, 2.516, 1 / 0.086))
 }
 
 #' False Recency Rate (FRR) for the LAg-Avidity
@@ -18,11 +21,9 @@ aids_survival <- function(n=365*5){
 #' than 2 years ago that test as recent on the LAg-Avidity assay. The second is the standard
 #' error of the proportion.
 #' @export
-lag_avidity_frr <- function(){
-  c(
-    proportion = 2 / 362,
-    std_error = sqrt((2 / 362) * (1-2 / 362) / 362)
-  )
+lag_avidity_frr <- function() {
+  c(proportion = 2 / 362,
+    std_error = sqrt((2 / 362) * (1 - 2 / 362) / 362))
 }
 
 #' Survival curve for testing recent

@@ -155,8 +155,8 @@ rita_bootstrap <- function(
   ever_hiv_test,
   weights,
   rep_weights = NULL,
-  rep_weight_type=c("BRR", "Fay", "JK1","JK2","JKn","bootstrap","other"),
-  combined_weights=TRUE,
+  rep_weight_type = c("BRR", "Fay", "JK1", "JK2", "JKn", "bootstrap", "other"),
+  combined_weights = TRUE,
   tau = 2,
   frr = lag_avidity_frr()[1],
   test_history_population = c("undiagnosed", "negative"),
@@ -173,7 +173,7 @@ rita_bootstrap <- function(
       undiagnosed = undiagnosed,
       elite_cntr = elite_cntr,
       hiv = hiv,
-      tslt=tslt,
+      tslt = tslt,
       ever_hiv_test = ever_hiv_test,
       weights = wts,
       tau = tau,
@@ -200,10 +200,11 @@ rita_bootstrap <- function(
   weights <- weights[not_miss]
   rep_weights <- rep_weights[not_miss,]
 
-  rep_design <- survey::svrepdesign(repweights=rep_weights,weights=weights,
-                                    data=rep_weights,
-                                    combined.weights=combined_weights,
-                                    type=rep_weight_type,
+  rep_design <- survey::svrepdesign(repweights = rep_weights,
+                                    weights = weights,
+                                    data = rep_weights,
+                                    combined.weights = combined_weights,
+                                    type = rep_weight_type,
                                     ...)
   scale <- rep_design$scale
   rscales <- rep_design$rscales
@@ -231,14 +232,20 @@ rita_bootstrap <- function(
   for(i in 1:nr){
     for(j in 1:nc){
       if(!all(is.na(estimates[i,j,])))
-        vars[i,j] <- survey::svrVar(estimates[i,j,], scale, rscales, mse=mse,coef=values[i,j])
+        vars[i,j] <- survey::svrVar(
+          estimates[i,j,],
+          scale,
+          rscales,
+          mse = mse,
+          coef = values[i,j]
+          )
     }
   }
   bb <- list(value=values,
              var = vars,
-             replicates=estimates,
-             nrep=nrep,
-             errors=errors)
+             replicates = estimates,
+             nrep = nrep,
+             errors = errors)
   res <- .table_rita_boot_est(bb, conf_level = conf_level)
   attr(res,"bootstraps") <- bb
   res
@@ -261,8 +268,6 @@ rita_bootstrap <- function(
     "std_error",
     "lower_bound",
     "upper_bound"
-    #paste0(100*conf_level,"% CI lower"),
-    #paste0(100*conf_level,"% CI upper")
   )
   res
 }
