@@ -14,6 +14,10 @@ You can install from github using
 devtools::install_github("fellstat/rita",auth_token="<your github auth token>")
 ```
 
+# Usage
+
+**[A brief tour of the package](https://htmlpreview.github.io/?https://github.com/fellstat/rita/blob/main/inst/doc/introduction.html)**
+
 ## Example
 
 ``` r
