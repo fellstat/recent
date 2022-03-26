@@ -31,7 +31,7 @@ diagnosis_survival(
 }
 \value{
 A vector where the ith element is the probability that an
-individual infected i days ago has been diagnosed.
+individual infected i days ago has not been diagnosed.
 }
 \description{
 Survival probability for RITA Screening
