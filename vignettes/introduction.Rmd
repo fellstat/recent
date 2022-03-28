@@ -1,5 +1,5 @@
 ---
-title: "rita"
+title: "Gettign Started with the 'rita' Package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{rita}
