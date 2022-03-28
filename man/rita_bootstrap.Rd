@@ -7,7 +7,7 @@
 rita_bootstrap(
   recent,
   undiagnosed,
-  elite_cntr,
+  low_viral,
   hiv,
   tslt,
   ever_hiv_test,
@@ -30,7 +30,7 @@ rita_bootstrap(
 
 \item{undiagnosed}{Logical. No previous diagnosis.}
 
-\item{elite_cntr}{Logical. Is an elite controller (VL < 1000).}
+\item{low_viral}{Logical.  Has low viral load (< 1000).}
 
 \item{hiv}{Logical. Is HIV positive.}
 
@@ -82,7 +82,7 @@ rep_weights <-  dplyr::select(assay_data, dplyr::contains("btwt"))
 rita_bootstrap(
 recent=assay_data$recent,
 undiagnosed=assay_data$undiagnosed,
-elite_cntr=assay_data$elite_cntr,
+low_viral=assay_data$low_viral,
 hiv=assay_data$hiv,
 weights=assay_data$weights,
 tslt=assay_data$tslt,

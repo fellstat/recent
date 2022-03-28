@@ -3,7 +3,7 @@
 #' Assay Based Incidence Estimation
 #' @param recent Logical. Tests recent on assay.
 #' @param undiagnosed Logical. No previous diagnosis.
-#' @param elite_cntr Logical. Is an elite controller (VL < 1000).
+#' @param low_viral Logical. Has low viral load (< 1000).
 #' @param hiv Logical. Is HIV positive.
 #' @param weights Survey weights.
 #' @param tslt Time since last HIV test (days).
@@ -28,7 +28,7 @@
 #' rita_incidence(
 #' recent=assay_data$recent,
 #' undiagnosed=assay_data$undiagnosed,
-#' elite_cntr=assay_data$elite_cntr,
+#' low_viral=assay_data$low_viral,
 #' hiv=assay_data$hiv,
 #' weights=assay_data$weights,
 #' tslt=assay_data$tslt,
@@ -38,7 +38,7 @@
 rita_incidence <- function(
   recent,
   undiagnosed,
-  elite_cntr,
+  low_viral,
   hiv,
   tslt,
   ever_hiv_test,
@@ -69,7 +69,7 @@ rita_incidence <- function(
 
   omega <- sum(assay_surv[1:tau_days] * diag_surv[1:tau_days] * aids_surv[1:tau_days]) / 365
 
-  screen_in <- undiagnosed * (!elite_cntr)
+  screen_in <- undiagnosed * (!low_viral)
   screen_in[!hiv] <- FALSE
 
   phiv <- sum(hiv * weights, na.rm=TRUE) /
@@ -105,7 +105,7 @@ rita_incidence <- function(
 #' Survey bootstrap
 #' @param recent Logical. Tests recent on assay.
 #' @param undiagnosed Logical. No previous diagnosis.
-#' @param elite_cntr Logical. Is an elite controller (VL < 1000).
+#' @param low_viral Logical.  Has low viral load (< 1000).
 #' @param hiv Logical. Is HIV positive.
 #' @param weights Survey weights.
 #' @param tslt Time since last HIV test (days).
@@ -137,7 +137,7 @@ rita_incidence <- function(
 #' rita_bootstrap(
 #' recent=assay_data$recent,
 #' undiagnosed=assay_data$undiagnosed,
-#' elite_cntr=assay_data$elite_cntr,
+#' low_viral=assay_data$low_viral,
 #' hiv=assay_data$hiv,
 #' weights=assay_data$weights,
 #' tslt=assay_data$tslt,
@@ -149,7 +149,7 @@ rita_incidence <- function(
 rita_bootstrap <- function(
   recent,
   undiagnosed,
-  elite_cntr,
+  low_viral,
   hiv,
   tslt,
   ever_hiv_test,
@@ -171,7 +171,7 @@ rita_bootstrap <- function(
     as.matrix(rita_incidence(
       recent=recent,
       undiagnosed = undiagnosed,
-      elite_cntr = elite_cntr,
+      low_viral = low_viral,
       hiv = hiv,
       tslt = tslt,
       ever_hiv_test = ever_hiv_test,
@@ -193,7 +193,7 @@ rita_bootstrap <- function(
     stop("Too few observations with non-missing rep_weights and weights")
   recent <- recent[not_miss]
   undiagnosed <- undiagnosed[not_miss]
-  elite_cntr <- elite_cntr[not_miss]
+  low_viral <- low_viral[not_miss]
   hiv <- hiv[not_miss]
   tslt <-tslt[not_miss]
   ever_hiv_test <- ever_hiv_test[not_miss]

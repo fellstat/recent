@@ -46,7 +46,7 @@ test_that("rita_incidence", {
   ri <- rita_incidence(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,
@@ -68,7 +68,7 @@ test_that("rita_incidence", {
   ri <- rita_incidence(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,
@@ -81,7 +81,7 @@ test_that("rita_incidence", {
   ri2 <- rita_incidence(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,
@@ -102,7 +102,7 @@ test_that("rita_bootstrap", {
   expect_warning(ri <- rita_bootstrap(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,

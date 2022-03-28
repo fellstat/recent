@@ -46,7 +46,7 @@ Incidence is calculated using the `rita_incidence` function. The `frr` and `assa
 inc <- rita_incidence(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,
@@ -73,7 +73,7 @@ By default the function estimates the time to diagnosis distribution using testi
 inc <- rita_incidence(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,
@@ -94,7 +94,7 @@ rep_weights <-  dplyr::select(assay_data, dplyr::contains("btwt"))
 ri <- rita_bootstrap(
     recent=assay_data$recent,
     undiagnosed=assay_data$undiagnosed,
-    elite_cntr=assay_data$elite_cntr,
+    low_viral=assay_data$elite_cntr,
     hiv=assay_data$hiv,
     weights=assay_data$weights,
     tslt=assay_data$tslt,

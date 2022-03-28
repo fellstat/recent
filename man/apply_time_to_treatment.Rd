@@ -50,7 +50,7 @@ assay_data$treated <- assay_data$undiagnosed
 rita_incidence(
 recent=assay_data$recent,
 undiagnosed=assay_data$treated, #used treated indicator in place of undiagnosed for screening
-elite_cntr=assay_data$elite_cntr,
+low_viral=assay_data$elite_cntr,
 hiv=assay_data$hiv,
 weights=assay_data$weights,
 tslt=assay_data$tslt,
