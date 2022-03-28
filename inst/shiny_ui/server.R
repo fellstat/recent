@@ -4,7 +4,7 @@ library(shiny)
 library(promises)
 library(future)
 library(ipc)
-plan(multiprocess)
+plan(multisession)
 library(ggplot2)
 library(rita)
 library(survey)
@@ -198,7 +198,6 @@ shinyServer(function(input, output, session) {
     if(is.null(weights))
       weights <- rep(1, length(hiv))
 
-    subset=NULL
     if(is.null(get_raw_data()))
       stop("No Data Uploaded")
     if(is.null(undiagnosed))
@@ -257,7 +256,6 @@ shinyServer(function(input, output, session) {
       result <- do.call(rbind,result)
       colnames(result)[1] <- "strata"
     }
-    browser()
     incidence(inc)
     boot_result(NULL)
     as.data.frame(result)
@@ -265,6 +263,9 @@ shinyServer(function(input, output, session) {
   width="400px", digits=4)
 
   interruptor <- AsyncInterruptor$new()
+
+
+
 
   boot_result <- reactiveVal()
   observeEvent(input$run,{
@@ -276,92 +277,149 @@ shinyServer(function(input, output, session) {
     boot_result(data.frame(Status="Running..."))
     if(is.null(incidence()))
       return(NULL)
-    type <- input$type
-    nrep <- as.numeric(input$nrep)
-    incc <- incidence()
+    #incc <- incidence()
     rep_weights <- get_rep_weights()
-    design_strata <- get_design_strata()
-    design_clusters <- get_design_clusters()
-    weights <- get_weights()
-    if(is.null(rep_weights) & (!is.null(design_strata) || !is.null(design_clusters))){
-      print("Generating survey replicate weights from design")
-      if(is.null(weights)){
-        showNotification("Error: Survey design, but no weights given.")
-        nclicks(0)
-        return()
-      }
-      if(nrep > 5000){
-        showNotification("Error: number of replicates must be < 5000 for survey bootstraps without replicate weights")
-        nclicks(0)
-        return()
-      }
-      if(is.null(design_strata) & !is.null(design_clusters)){
-        df <- data.frame(design_clusters,weights)
-        des <- svydesign(id = ~design_clusters,
-                         weights = ~weights, data=df)
-      }else if(!is.null(design_strata) & is.null(design_clusters)){
-        df <- data.frame(design_strata,weights)
-        des <- svydesign(id = ~1,
-                         strata = ~ design_strata,
-                         weights = ~weights, data=df)
-      }else{
-        df <- data.frame(design_clusters,design_strata,weights)
-        des <- svydesign(id = ~design_clusters,
-                         strata = ~ design_strata,
-                         weights = ~weights, data=df)
-      }
-      des1 <- as.svrepdesign(des, type="bootstrap", compress=FALSE, replicates=nrep)
-      rep_weights <- des1$repweights * weights
-      type <- "bootstrap"
-    }
-    if(!is.null(rep_weights))
-      nrep <- ncol(rep_weights)
+    nrep <- ncol(rep_weights)
 
-    progress <- AsyncProgress$new(message="Generating Boostrap Samples")
+
+    # Rerun on UI change
+    undiagnosed <- get_undiagnosed()
+    recent <- get_recent()
+    low_viral <- get_low_viral()
+    hiv <- get_hiv()
+    last_test <- get_last_test()
+    ever_test <- get_ever_test()
+
+    strata <- get_strata()
+
+    weights <- get_weights()
+    if(is.null(weights))
+      weights <- rep(1, length(hiv))
+
+    if(is.null(get_raw_data()))
+      stop("No Data Uploaded")
+    if(is.null(undiagnosed))
+      stop("Required Variable Not Specified: Undiagnosed")
+    if(is.null(hiv))
+      stop("Required Variable Not Specified: HIV Status")
+    if(is.null(recent))
+      stop("Required Variable Not Specified: Assay Recent")
+    if(is.null(last_test))
+      stop("Required Variable Not Specified: Last Test")
+    if(is.null(low_viral))
+      stop("Required Variable Not Specified: Low Viral Load")
+    #sm_strata <- min(table(strata))
+    #if(!is.null(strata) && sm_strata < 5){
+    #  stop("Stratifying Variable Has Strata With Too Few Observations")
+    #}
+    tau <- input$tau
+    frr <- input$frr
+    test_history_population <- input$test_history_population
+    type <- input$type
+    #progress <- AsyncProgress$new(message="Generating Boostrap Samples")
     prog <- function(i, strata, nstrata){
       interruptor$execInterrupts()
-      progress$set(( (strata - 1) * nrep + i) / (nrep*nstrata))
+      #progress$set(( (strata - 1) * nrep + i) / (nrep*nstrata))
     }
-    stratified <- length(incc) > 1
-    result <- finally(
-      catch(
-        future({
-          blist <- list()
-          nstrata <- length(incc)
-          for(i in 1:nstrata){
-            callback <- function(k) prog(k, i, nstrata)
-            if(is.null(rep_weights))
-              boot <- as.data.frame(summary(bootstrap_incidence(incc[[i]],
-                                                                nrep=nrep,
-                                                                show_progress=callback)))
-            else
-              boot <- as.data.frame(summary(bootstrap_incidence(incc[[i]],
-                                                                rep_weights=rep_weights,
-                                                                type=type,
-                                                                show_progress=callback)))
-            if(stratified){
-              boot <- cbind(names(incc)[i], boot)
-              names(boot)[1] <- "strata"
-            }
-            if(nrow(boot) > 1){
-              boot <- cbind(row.names(boot), boot)
-              names(boot)[1] <- "age_subgroup"
-            }
-            blist[[i]] <- boot
-          }
-          do.call(rbind, blist)
-        })  %...>% boot_result,
-        function(e) {
-          boot_result(NULL)
-          print(e$message)
-          showNotification(e$message)
-        }
-      ),
-      function(){
-        progress$sequentialClose()
-        nclicks(0)
+    inc <- list()
+    if(is.null(strata)){
+      callback <- function(k) prog(k, 1, 1)
+      inc[["all"]] <- rita_bootstrap(recent=recent,
+                                     undiagnosed = undiagnosed,
+                                     ever_hiv_test = ever_test,
+                                     low_viral = low_viral,
+                                     hiv = hiv,
+                                     tslt=last_test,
+                                     weights=weights,
+                                     tau=tau,
+                                     frr=frr,
+                                     rep_weights = rep_weights,
+                                     rep_weight_type = type,
+                                     test_history_population=test_history_population,
+                                     show_progress = callback
+      )
+      inc[[1]] <- cbind(
+        quantity = row.names(inc[[1]]),
+        inc[[1]]
+      )
+      result <- inc[[1]]
+
+    }else{
+      lvls <- levels(strata)
+      nstrata <- length(lvls)
+      for(i in 1:length(lvls)){
+        lv <- lvls[i]
+        callback <- function(k) prog(k, i, nstrata)
+        inc[[lv]] <- try(rita_bootstrap(recent=recent[strata == lv],
+                                        undiagnosed = undiagnosed[strata == lv],
+                                        ever_hiv_test = ever_test[strata == lv],
+                                        low_viral = low_viral[strata == lv],
+                                        hiv = hiv[strata == lv],
+                                        tslt=last_test[strata == lv],
+                                        weights=weights[strata == lv],
+                                        tau=tau,
+                                        frr=frr,
+                                        rep_weights = rep_weights[strata == lv,],
+                                        rep_weight_type = type,
+                                        test_history_population=test_history_population,
+                                        show_progress = callback
+        ))
+        inc[[lv]] <- cbind(
+          quantity = row.names(inc[[lv]]),
+          stratum = lv,
+          inc[[lv]]
+        )
       }
-    )
+      result <- dplyr::bind_rows(inc) %>% dplyr::arrange(quantity,stratum)
+      row.names(result) <- NULL
+    }
+    boot_result(as.data.frame(result))
+
+    # progress <- AsyncProgress$new(message="Generating Boostrap Samples")
+    # prog <- function(i, strata, nstrata){
+    #   interruptor$execInterrupts()
+    #   progress$set(( (strata - 1) * nrep + i) / (nrep*nstrata))
+    # }
+    # stratified <- length(incc) > 1
+    # result <- finally(
+    #   catch(
+    #     future({
+    #       blist <- list()
+    #       nstrata <- length(incc)
+    #       for(i in 1:nstrata){
+    #         callback <- function(k) prog(k, i, nstrata)
+    #         if(is.null(rep_weights))
+    #           boot <- as.data.frame(summary(bootstrap_incidence(incc[[i]],
+    #                                                             nrep=nrep,
+    #                                                             show_progress=callback)))
+    #         else
+    #           boot <- as.data.frame(summary(bootstrap_incidence(incc[[i]],
+    #                                                             rep_weights=rep_weights,
+    #                                                             type=type,
+    #                                                             show_progress=callback)))
+    #         if(stratified){
+    #           boot <- cbind(names(incc)[i], boot)
+    #           names(boot)[1] <- "strata"
+    #         }
+    #         if(nrow(boot) > 1){
+    #           boot <- cbind(row.names(boot), boot)
+    #           names(boot)[1] <- "age_subgroup"
+    #         }
+    #         blist[[i]] <- boot
+    #       }
+    #       do.call(rbind, blist)
+    #     })  %...>% boot_result,
+    #     function(e) {
+    #       boot_result(NULL)
+    #       print(e$message)
+    #       showNotification(e$message)
+    #     }
+    #   ),
+    #   function(){
+    #     progress$sequentialClose()
+    #     nclicks(0)
+    #   }
+    # )
 
     NULL
   })

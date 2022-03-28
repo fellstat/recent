@@ -117,7 +117,13 @@ shinyUI(
                           sidebarPanel(
                               numericInput("tau","Recency Period (tau)", min = 0, value = 2),
                               numericInput("frr","Reference False Recency Rate (FRR)", min = 0, value =  .0055),
-                              selectizeInput("test_history_population", options = c("undiagnosed","negative")),
+                              selectizeInput("test_history_population", "Testing History Population", choices = c("undiagnosed","negative"), selected="undiagnosed"),
+                              h3("Bootstrap Confidence Intervals"),
+                              selectInput("type",
+                                          "Replicate Weight Type:",
+                                          choices = c("Jackknife"="JK1","Bootstrap"="bootstrap","BRR", "Fay"),
+                                          selected="JK1"
+                              ),
                               actionButton('run', 'Run'),
                               actionButton('cancel', 'Cancel')
                           ),

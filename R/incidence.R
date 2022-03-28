@@ -28,7 +28,7 @@
 #' rita_incidence(
 #' recent=assay_data$recent,
 #' undiagnosed=assay_data$undiagnosed,
-#' low_viral=assay_data$low_viral,
+#' low_viral=assay_data$elite_cntr,
 #' hiv=assay_data$hiv,
 #' weights=assay_data$weights,
 #' tslt=assay_data$tslt,
@@ -137,7 +137,7 @@ rita_incidence <- function(
 #' rita_bootstrap(
 #' recent=assay_data$recent,
 #' undiagnosed=assay_data$undiagnosed,
-#' low_viral=assay_data$low_viral,
+#' low_viral=assay_data$elite_cntr,
 #' hiv=assay_data$hiv,
 #' weights=assay_data$weights,
 #' tslt=assay_data$tslt,
@@ -214,7 +214,7 @@ rita_bootstrap <- function(
 
   errors <- list()
   estimates <- array(NA, dim=c(nr, nc, nrep))
-  if(!is.function(show_progress) & show_progress)
+  if(!is.function(show_progress) && show_progress)
     prog_bar <- progress::progress_bar$new(total=nrep)
   for(i in 1:nrep){
     if(is.function(show_progress))

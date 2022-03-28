@@ -82,7 +82,7 @@ rep_weights <-  dplyr::select(assay_data, dplyr::contains("btwt"))
 rita_bootstrap(
 recent=assay_data$recent,
 undiagnosed=assay_data$undiagnosed,
-low_viral=assay_data$low_viral,
+low_viral=assay_data$elite_cntr,
 hiv=assay_data$hiv,
 weights=assay_data$weights,
 tslt=assay_data$tslt,
