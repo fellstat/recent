@@ -7,15 +7,17 @@ test_that("diagnosis_survival", {
     assay_data$hiv,
     assay_data$weights,
     n=40)
-  ds_ref <- c(1, 1, 1, 1, 1, 1, 0.98562301612998, 0.964535350247737, 0.964535350247737,
-              0.964535350247737, 0.964535350247737, 0.964535350247737, 0.964535350247737,
-              0.964535350247737, 0.964535350247737, 0.964535350247737, 0.964535350247737,
-              0.964535350247737, 0.964535350247737, 0.964535350247737, 0.964535350247737,
-              0.964535350247737, 0.964535350247737, 0.964535350247737, 0.964535350247737,
-              0.95787893358629, 0.946201730088066, 0.936196048975817, 0.932986711601312,
-              0.932986711601312, 0.932986711601312, 0.912218572067184, 0.906361274008822,
-              0.896109729774375, 0.878849074708043, 0.874355790732545, 0.870822878264839,
-              0.870822878264839, 0.861540398772289, 0.861540398772289)
+  ds_ref <- c(0.999999999254463, 0.999999995735573, 0.999999988172136, 0.999999975607732,
+              0.999999957236054, 0.999999932345329, 0.985622917854146, 0.964535215673545,
+              0.964535169254846, 0.964535114315464, 0.964535050378901, 0.964534976991274,
+              0.96453489371831, 0.964534800142956, 0.964534695863445, 0.964534580491691,
+              0.964534453651958, 0.964534314979725, 0.964534164120719, 0.964534000730082,
+              0.964533824471638, 0.964533635017262, 0.964533432046313, 0.964533215245133,
+              0.964532984306605, 0.957876340289432, 0.946198913238991, 0.936192994863821,
+              0.932983387017365, 0.932983090997963, 0.932982779634702, 0.912214407934872,
+              0.906356803565437, 0.896104965132648, 0.878844048302637, 0.87435042272391,
+              0.870817150394265, 0.870816752884103, 0.861533929404766, 0.861533503901948
+  )
   expect_true(sum(abs(ds - ds_ref))<.000001)
   ds2 <- diagnosis_survival(
     assay_data$undiagnosed,
@@ -26,15 +28,16 @@ test_that("diagnosis_survival", {
     n=40,
     population = "negative"
     )
-  ds2_ref <- c(1, 1, 1, 1, 1, 0.997393559346621, 0.980695439368877, 0.961522015694892,
-               0.945955021963414, 0.945955021963414, 0.945955021963414, 0.945955021963414,
-               0.945955021963414, 0.945955021963414, 0.945955021963414, 0.945955021963414,
-               0.945955021963414, 0.945955021963414, 0.945955021963414, 0.945955021963414,
-               0.945955021963414, 0.945955021963414, 0.945955021963414, 0.944869424524847,
-               0.943784680572044, 0.940739537618185, 0.93428417968315, 0.926030218738885,
-               0.913853159277611, 0.901796502146821, 0.89215865116476, 0.88475549241198,
-               0.871912502973354, 0.863608904933591, 0.855387470890678, 0.846958061617173,
-               0.835343826038554, 0.827755118411892, 0.823682461366196, 0.823682461366196
+  ds2_ref <- c(0.999999999254463, 0.999999995735573, 0.999999988172136, 0.999999975607732,
+               0.999999957236054, 0.997393491868288, 0.980695341584368, 0.961521881541127,
+               0.945954844457079, 0.945954790576022, 0.945954727871102, 0.945954655897177,
+               0.945954574228342, 0.945954482455577, 0.945954380184854, 0.945954267035565,
+               0.945954142639209, 0.945954006638289, 0.945953858685356, 0.945953698442193,
+               0.945953525579105, 0.945953339774284, 0.945953140713266, 0.944867333052843,
+               0.943782365530925, 0.940736990723371, 0.934281398312705, 0.926027197790439,
+               0.913849902873736, 0.901793002582042, 0.892154891263378, 0.884751453644247,
+               0.871908202441554, 0.863604313099702, 0.855382578669327, 0.846952861813802,
+               0.835338331532795, 0.827749295970403, 0.823676276276591, 0.823675869471281
   )
   expect_true(sum(abs(ds2 - ds2_ref))<.000001)
 })
@@ -112,4 +115,78 @@ test_that("rita_bootstrap", {
     show_progress = FALSE
   ))
 #expect_true(sum(abs(ri - ri_ref))<.000001)
+})
+
+
+
+test_that("RITA2", {
+  data("assay_data")
+  diag_surv <- diagnosis_survival(
+    assay_data$undiagnosed,
+    assay_data$tslt,
+    assay_data$ever_hiv_test,
+    assay_data$hiv,
+    assay_data$weights,
+    n=365*2)
+
+  # Posit an average time to treatment of 150 days
+  treat_surv <- 1 - pexp(1:(365*2), 1/150)
+
+  # Calculate the treatment survival function
+  diag_treat_surv <- apply_time_to_treatment(diag_surv, treat_surv)
+
+  # Compare survival curve for time to diagnosis (red) vs time to treatment (black)
+  plot(diag_treat_surv, type="l")
+  points(diag_surv, type="l",col="red")
+
+  #Create a dummy variable for treatment
+  assay_data$treated <- assay_data$undiagnosed
+  assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
+
+  #Calculate incidence
+  ri1 <- rita_incidence(
+    recent=assay_data$recent,
+    undiagnosed=!assay_data$treated, #used treated indicator in place of undiagnosed for screening
+    low_viral=assay_data$elite_cntr,
+    hiv=assay_data$hiv,
+    weights=assay_data$weights,
+    tslt=assay_data$tslt,
+    ever_hiv_test=assay_data$ever_hiv_test,
+    diag_surv = diag_treat_surv
+  )
+
+  ri2 <- rita_incidence(
+    recent=assay_data$recent,
+    undiagnosed=assay_data$undiagnosed,
+    low_viral=assay_data$elite_cntr,
+    hiv=assay_data$hiv,
+    weights=assay_data$weights,
+    tslt=assay_data$tslt,
+    ever_hiv_test=assay_data$ever_hiv_test,
+    treated = assay_data$treated,
+    treat_surv = treat_surv
+  )
+  expect_identical(ri1,ri2)
+
+  ri1_ref <- structure(list(incidence = 0.00383206717870841, residual_frr = 0.000842313332886876,
+                            omega_rs = 0.335938952038046, omega_s = 1.33546256766089,
+                            `P(R|S)` = 0.0287379226230863, `P(S|H)` = 0.164430714369552,
+                            `P(H)` = 0.24804274938758), class = "data.frame", row.names = c(NA,
+                                                                                            -1L))
+  expect_true(sum(abs(ri1 - ri1_ref))<.000001)
+
+  expect_warning(rboot <- rita_bootstrap(
+    recent=assay_data$recent,
+    undiagnosed=assay_data$undiagnosed,
+    low_viral=assay_data$elite_cntr,
+    hiv=assay_data$hiv,
+    weights=assay_data$weights,
+    tslt=assay_data$tslt,
+    ever_hiv_test=assay_data$ever_hiv_test,
+    rep_weights = assay_data %>% dplyr::select(contains("btwt")),
+    rep_weight_type = "JK2",
+    treated = assay_data$treated,
+    treat_surv = treat_surv,
+    show_progress = FALSE
+  ))
 })

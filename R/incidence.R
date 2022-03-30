@@ -13,6 +13,8 @@
 #' @param test_history_population If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
 #' @param diag_surv time to diagnosis survival function vector. If specified, overrides the internal calculation.
+#' @param treated A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.
+#' @param treat_surv probability an individual diagnosed i days ago is not on treatment.
 #' @returns
 #' A data.frame with the following values:
 #'
@@ -34,6 +36,27 @@
 #' tslt=assay_data$tslt,
 #' ever_hiv_test=assay_data$ever_hiv_test
 #' )
+#'
+#' # RITA2 Screening
+#' ## Posit an average time from diagnosis to treatment of 150 days
+#' treat_surv <- 1 - pexp(1:(365*2), 1/150)
+#'
+#' ## Create a dummy variable for treatment
+#' assay_data$treated <- assay_data$undiagnosed
+#' assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
+#'
+#' # Calculate incidence using RITA2 screening (i.e. screen as non-recent if either treated or low viral load)
+#' rita_incidence(
+#' recent=assay_data$recent,
+#' undiagnosed=assay_data$undiagnosed,
+#' low_viral=assay_data$elite_cntr,
+#' hiv=assay_data$hiv,
+#' weights=assay_data$weights,
+#' tslt=assay_data$tslt,
+#' ever_hiv_test=assay_data$ever_hiv_test,
+#' treated = assay_data$treated,
+#' treat_surv = treat_surv
+#' )
 #' @export
 rita_incidence <- function(
   recent,
@@ -47,7 +70,9 @@ rita_incidence <- function(
   frr = lag_avidity_frr()[1],
   test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
-  diag_surv = NULL
+  diag_surv = NULL,
+  treated = NULL,
+  treat_surv = NULL
 ){
   test_history_population <- match.arg(test_history_population)
   tau_days <- tau * 365
@@ -64,13 +89,22 @@ rita_incidence <- function(
     )
 
   frr <- as.vector(frr)
-  aids_surv = aids_survival(tau * 365)
-  omega_s <- sum(diag_surv[1:tau_days] * aids_surv[1:tau_days]) / 365
 
-  omega <- sum(assay_surv[1:tau_days] * diag_surv[1:tau_days] * aids_surv[1:tau_days]) / 365
+  omega_s <- sum(diag_surv[1:tau_days]) / 365
+  omega <- sum(assay_surv[1:tau_days] * diag_surv[1:tau_days]) / 365
 
-  screen_in <- undiagnosed * (!low_viral)
+  screen_in <- undiagnosed & (!low_viral)
   screen_in[!hiv] <- FALSE
+
+  if(!is.null(treated)){
+    if(length(treated) != length(undiagnosed))
+      stop("length(treated) != length(undiagnosed)")
+    diag_treat_surv <- apply_time_to_treatment(diag_surv, treat_surv)
+    omega_s <- sum(diag_treat_surv[1:tau_days]) / 365
+    omega <- sum(assay_surv[1:tau_days] * diag_treat_surv[1:tau_days]) / 365
+    screen_in <- (!treated) & (!low_viral)
+    screen_in[!hiv] <- FALSE
+  }
 
   phiv <- sum(hiv * weights, na.rm=TRUE) /
       sum(weights[!is.na(hiv)])
@@ -162,6 +196,8 @@ rita_bootstrap <- function(
   test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
   diag_surv = NULL,
+  treated = NULL,
+  treat_surv = NULL,
   conf_level=.95,
   show_progress = TRUE,
   ...
@@ -180,7 +216,9 @@ rita_bootstrap <- function(
       frr = frr,
       test_history_population = test_history_population,
       assay_surv = assay_surv,
-      diag_surv = diag_surv
+      diag_surv = diag_surv,
+      treated = treated,
+      treat_surv = treat_surv
     ))
   }
   values <- fun(weights)
@@ -199,6 +237,8 @@ rita_bootstrap <- function(
   ever_hiv_test <- ever_hiv_test[not_miss]
   weights <- weights[not_miss]
   rep_weights <- rep_weights[not_miss,]
+  if(!is.null(treated))
+    treated <- treated[not_miss]
 
   rep_design <- survey::svrepdesign(repweights = rep_weights,
                                     weights = weights,

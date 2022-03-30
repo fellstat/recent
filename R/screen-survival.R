@@ -48,7 +48,10 @@ diagnosis_survival <- function(
   p_never_test <- sum((!ever_hiv_test[sub_pop]) * weights[sub_pop], na.rm=TRUE) /
     sum((!is.na(ever_hiv_test[sub_pop])) * weights[sub_pop])
   tst_surv <- 1 - (1 - tst_surv) * (1 - p_never_test)
-  tst_surv
+
+  aids_surv <- aids_survival(length(tst_surv))
+
+  tst_surv * aids_surv
 }
 
 #' Obtain Probability Curve for Treatment
