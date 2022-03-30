@@ -11,7 +11,7 @@ Provides functions and methods to estimate incidence from a cross-sectional surv
 You can install from github using
 
 ``` r
-devtools::install_github("fellstat/rita",auth_token="<your github auth token>")
+devtools::install_github("fellstat/rita")
 ```
 
 # Usage
