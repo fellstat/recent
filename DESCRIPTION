@@ -21,3 +21,4 @@ Imports:
     survey,
     dplyr
 VignetteBuilder: knitr
+URL: https://fellstat.github.io/rita/

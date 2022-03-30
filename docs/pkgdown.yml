@@ -1,0 +1,11 @@
+pandoc: 2.11.4
+pkgdown: 2.0.2
+pkgdown_sha: ~
+articles:
+  design_and_data: design_and_data.html
+  introduction: introduction.html
+last_built: 2022-03-30T20:54Z
+urls:
+  reference: https://fellstat.github.io/rita/reference
+  article: https://fellstat.github.io/rita/articles
+
