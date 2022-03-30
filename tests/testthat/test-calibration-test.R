@@ -189,4 +189,6 @@ test_that("RITA2", {
     treat_surv = treat_surv,
     show_progress = FALSE
   ))
+  expect_true(sum(abs(ri1 - rboot[,1]))<.000001)
+
 })
