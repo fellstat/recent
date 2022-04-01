@@ -10,8 +10,8 @@ req <- function(pkg){
 
 req("shiny")
 #req("promises")
-#req("future")
-# future::plan(future::multisession)
+req("future")
+#future::plan(future::multisession)
 #req("ipc")
 req("ggplot2")
 req("rita")
@@ -292,7 +292,7 @@ shinyServer(function(input, output, session) {
   }, rownames=FALSE,
   width="400px", digits=4)
 
-  interruptor <- AsyncInterruptor$new()
+  #interruptor <- AsyncInterruptor$new()
 
 
 
@@ -357,7 +357,7 @@ shinyServer(function(input, output, session) {
     treat_surv <- 1 - pexp(1:ceiling(365*tau), lambda)
     #progress <- AsyncProgress$new(message="Generating Boostrap Samples")
     prog <- function(i, strata, nstrata){
-      interruptor$execInterrupts()
+      #interruptor$execInterrupts()
       #progress$set(( (strata - 1) * nrep + i) / (nrep*nstrata))
     }
     inc <- list()

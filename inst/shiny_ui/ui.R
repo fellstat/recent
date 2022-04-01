@@ -44,24 +44,24 @@ shinyUI(
                             ),
                             conditionalPanel("output.table != null",
                                              selectizeInput("hiv", "HIV+:",
-                                                            c("")) %>% shelp(content="hiv"),
+                                                            c("")) |> shelp(content="hiv"),
                                              selectizeInput("undiagnosed", "Undiagnosed:",
-                                                            c("")) %>% shelp(content="undiagnosed"),
+                                                            c("")) |> shelp(content="undiagnosed"),
                                              selectizeInput("ever_test", "Ever Had An HIV Test:",
-                                                            c("")) %>% shelp(content="ever_test"),
+                                                            c("")) |> shelp(content="ever_test"),
                                              selectizeInput("low_viral", "Low/Undetectable Viral Load:",
-                                                            c("")) %>% shelp(content="low_viral"),
+                                                            c("")) |> shelp(content="low_viral"),
                                              selectizeInput("recent", "Assay Recent:",
-                                                            c("")) %>% shelp(content="recent"),
+                                                            c("")) |> shelp(content="recent"),
                                              selectizeInput("last_test", "Time Since Last HIV Test (Days):",
-                                                            c("")) %>% shelp(content="last_test"),
+                                                            c("")) |> shelp(content="last_test"),
                                              selectizeInput("strata", "Stratify By (Optional):",
-                                                            c("")) %>% shelp(content="strata"),
+                                                            c("")) |> shelp(content="strata"),
                                              selectizeInput("treated", "Treated (Optional):",
-                                                            c("")) %>% shelp(content="treated"),
+                                                            c("")) |> shelp(content="treated"),
                                              tags$hr(),
                                              selectizeInput("weights", "Weights (Optional):",
-                                                            c("")) %>% shelp(content="weights"),
+                                                            c("")) |> shelp(content="weights"),
                                              pickerInput(inputId = "rep_weights",
                                                          label = "Replication Weights (Optional):",
                                                          choices = c(""),
@@ -69,7 +69,7 @@ shinyUI(
                                                          options = list(`actions-box` = TRUE,
                                                                         `live-search`=TRUE,
                                                                         `none-selected-text`="Choose Variable")
-                                             ) %>% shelp(content="rep_weights")
+                                             ) |> shelp(content="rep_weights")
                             ),
                             width=5),
                           mainPanel(
@@ -140,18 +140,18 @@ shinyUI(
                         # Sidebar with a slider input for number of bins
                         sidebarLayout(
                           sidebarPanel(
-                              numericInput("tau","Recency Period (tau)", min = 0, value = 2) %>% shelp(content="tau"),
-                              numericInput("frr","Reference False Recency Rate (FRR)", min = 0, value =  .0055) %>% shelp(content="frr"),
-                              selectizeInput("test_history_population", "Testing History Population", choices = c("undiagnosed","negative"), selected="undiagnosed") %>% shelp(content="test_history_population"),
+                              numericInput("tau","Recency Period (tau)", min = 0, value = 2) |> shelp(content="tau"),
+                              numericInput("frr","Reference False Recency Rate (FRR)", min = 0, value =  .0055) |> shelp(content="frr"),
+                              selectizeInput("test_history_population", "Testing History Population", choices = c("undiagnosed","negative"), selected="undiagnosed") |> shelp(content="test_history_population"),
                               conditionalPanel("input.treated != \"\"",
                                                selectInput(
                                                  "rita_type",
                                                  "RITA",
                                                  c("Diagnosis + Viral Load (RITA3)", "Treatment + Viral Load (RITA2)"),
                                                  "Diagnosis + Viral Load (RITA3)"
-                                               ) %>% shelp(content="rita_type"),
+                                               ) |> shelp(content="rita_type"),
                                                conditionalPanel("input.rita_type == \"Treatment + Viral Load (RITA2)\"",
-                                                                numericInput("median_ttt", "Median Time From Diagnosis to Treatment (Years)", min = 0, value = NA) %>% shelp(content="median_ttt")
+                                                                numericInput("median_ttt", "Median Time From Diagnosis to Treatment (Years)", min = 0, value = NA) |> shelp(content="median_ttt")
                                                )
                               ),
                               h3("Bootstrap Confidence Intervals"),
@@ -159,7 +159,7 @@ shinyUI(
                                           "Replicate Weight Type:",
                                           choices = c("Jackknife"="JK1","Bootstrap"="bootstrap","BRR", "Fay"),
                                           selected="JK1"
-                              ) %>% shelp(content="type"),
+                              ) |> shelp(content="type"),
                               actionButton('run', 'Run'),
                               #actionButton('cancel', 'Cancel'),
                               width = 4
