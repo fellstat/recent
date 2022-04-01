@@ -147,14 +147,23 @@
 <strong>Reference False Recency Rate (FRR, beta):</strong> The rate that long-term screened in individuals in the population that test recent on the assay.</li>
 <li>
 <strong>Test Performance Curve (q(t)):</strong> A curve that specifies, at each time since seroconversion up until tau, the probability that a screened in individual will test recent on the assay.</li>
+<li>
+<strong>Diagnosis-to-Treatment Curve (RITA2 Only, w(t)):</strong> RITA2 requires an additional external parameter curve representing the probability, given a time since diagnosis, that an individual will be on ARV treatment.</li>
 </ol>
 <p>Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.</p>
-<p>For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2]. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [TODO: cite], who reported a reference false recency rate of 0.55%.</p>
+<p>For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2]. This curve is provided by default in the <code>rita</code> R package. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [2], who reported a reference false recency rate of 0.55%.</p>
 <p>The tau parameter should be the same as the cut-off that was used to define ‘long-term’ in the reference study used to specify the reference FRR parameter. 2 years was used in [2].</p>
+<p>RITA2 requires an additional diagnosis-to-treatment curve. The value for this should be specified based on local information in the study population. It may be estimable from routine surveillance data. The requirement of this additional parameter is a reason to prefer RITA3 over RITA2.</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="analysis-plan">Analysis Plan<a class="anchor" aria-label="anchor" href="#analysis-plan"></a>
+</h2>
+<p>The <code>rita</code> package can be used for the analysis of both RITA3 and RITA2 algorithms. Additionally, a Shiny web application is available at <a href="http://www.epiapps.com" class="external-link">epiapps.com</a>.</p>
+<hr>
 <p>[1] Ian E. Fellows, Wolfgang Hladik, Jeffrey W. Eaton, Andrew C. Voetsch, Bharat S. Parekh and Ray W. Shiraishi “Improving Biomarker Based HIV Incidence Estimation in the Treatment Era.” arXiv preprint (2022).</p>
 <p>[2] Yen T Duong, Reshma Kassanjee, Alex Welte, Meade Morgan, Anindya De, Trudy Dobbs, Erin Rottinghaus, John Nkengasong, Marcel E Curlin, Chonticha Kitti- nunvorakoon, et al. Recalibration of the limiting antigen avidity eia to deter- mine mean duration of recent infection in divergent hiv-1 subtypes. PloS one, 10(2):e0114947, 2015</p>
 <p>[3] Li Yu, Oliver Laeyendecker, Sarah K Wendel, Fuxiong Liang, Wei Liu, Xueyan Wang, Lu Wang, Xianwu Pang, and Zhongliao Fang. Low false recent rate of limiting-antigen avidity assay among long-term infected subjects from guangxi, china. AIDS research and human retroviruses, 31(12):1247–1249, 2015.17</p>
-</div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
