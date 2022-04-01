@@ -1,6 +1,10 @@
 ---
 title: "A Practical Guide to Design and Data Collection for RITA Studies"
 output: html_document
+vignette: >
+  %\VignetteIndexEntry{design_and_data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 This guide will provide practical step-by-step statistical considerations for cross-sectional recency studies using the Lag-Avidity assay. 
@@ -76,17 +80,17 @@ given a time since diagnosis, that an individual will be on ARV treatment.
 
 Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.
 
-For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2].  This curve is provided by default in the `rita` R package. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [2], who reported a reference false recency rate of 0.55%.
+For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2].  This curve is provided by default in the `recent` R package. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [2], who reported a reference false recency rate of 0.55%.
 
 The tau parameter should be the same as the cut-off that was used to define 'long-term' in the reference study used to specify the reference FRR parameter. 2 years was used in [2]. 
 
 RITA2 requires an additional diagnosis-to-treatment curve. The value for this should be specified based on local information in
 the study population. It may be estimable from routine surveillance data. The requirement of this additional parameter is
 a reason to prefer RITA3 over RITA2.
-
+s
 # Analysis Plan
 
-The `rita` package can be used for the analysis of both RITA3 and RITA2 algorithms. Additionally, a Shiny web application is available
+The `recent` package can be used for the analysis of both RITA3 and RITA2 algorithms. Additionally, a Shiny web application is available
 at [epiapps.com](http://www.epiapps.com).
 
 

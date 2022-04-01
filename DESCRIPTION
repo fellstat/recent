@@ -8,6 +8,7 @@ Description: Provides functions and methods to estimate incidence from a cross-s
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
+LazyDataCompression: xz
 Suggests: 
     knitr,
     rmarkdown,
@@ -18,14 +19,13 @@ Suggests:
     future,
     promises,
     ggplot2,
-    survey
+    dplyr
 Config/testthat/edition: 3
 RoxygenNote: 7.1.2
 Depends: 
     R (>= 2.10)
 Imports:
     progress,
-    survey,
-    dplyr
+    survey
 VignetteBuilder: knitr
 URL: https://fellstat.github.io/rita/

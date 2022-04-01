@@ -2,7 +2,7 @@
 title: "Gettign Started with the 'rita' Package"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{rita}
+  %\VignetteIndexEntry{introduction}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
