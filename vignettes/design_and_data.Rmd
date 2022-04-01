@@ -11,27 +11,30 @@ Incidence estimation using recency assays are typically conducted in the context
 
 Data must be collected in the context of a population representative cross-sectional survey. This could be a simple random sample, but is more often a more complex survey design whose analysis involves the use of survey weights.
 
-## Power
-
-Obtaining precise incidence estimates typically requires significant sample sizes. We recommend using this [TODO: Add Link] tool for determining the appropriate sample size.
-
 ## Data Collection
 
 Incidence estimation requires the following data elements:
 
 1. **HIV Status:** Each enrolled subject should be given an HIV test. The type of test should be as close as possible to the seropositivity definition used in the reference parameter study. We recommend using [TODO: recommendation].
 2. **Lag-Avidity Assay:** A binary variable indicating “recent” if ODn < 1.5 and “non-recent” if ODn>=1.5. This should be collected for all HIV+ individuals.
-3. **Anti-Retroviral Therapy (ART) biomarkers:** A binary variable distinguishing those currently on ART from those that are not [TODO: Discuss which tests to use]. This should be collected for all HIV+ individuals.
-4. **Viral Load:** The viral load in copies per milliliter [TODO: ??].
+3. **Anti-Retroviral Therapy (ARV) biomarkers:** A binary variable distinguishing those currently on ART from those that are not. The biomarkers should cover all types of therapies in use in the population. This should be collected for all HIV+ individuals.
+4. **Viral Load:** The viral load in copies per milliliter.
 5. **Self-Reported Previous Diagnosis:** A binary variable indicating whether each individual reports having had a previous positive HIV test. This should be collected for all subjects.
-6. **Date of Last HIV Test:** The day, month and year of each individual’s last HIV test should be collected.
-7. **Date of Data Collection:** The day, month and year each subject was interviewed should be collected. This, combined with time of last HIV test is used to calculate the time since last HIV test.
+6. **Self-Reported Treatment Status:** A binary variable indicating whether the individual reports being on ARV therapy.
+7. **Date of Last HIV Test:** The day, month and year of each individual’s last HIV test should be collected.
+8. **Date of Data Collection:** The day, month and year each subject was interviewed should be collected. This, combined with time of last HIV test is used to calculate the time since last HIV test.
 
-## Missing Data
+## Missing Data and Variable Construction
 
 The amount of missing data should be minimized. This is especially true for elements 1-5, which are critical for the RITA algorithm. The software can handle missing data, but any missing data will reduce power and can potentially introduce biases.
 
 Individuals may not recall the exact day of their last HIV test, or if the test was long ago, they may not recall the month either. In these cases it is recommended that the midpoint of the time interval is imputed. For example, if the month is missing, June might be imputed. If the day of the month is missing, 15 may be imputed. If the potential period overlaps the survey date, impute the midpoint between the start of the period and the survey date. For example, if a subject only reports a test year of 2021 and the survey data was collected on 1/30/2021, then 1/15/2021 should be imputed for the test date. If the subject reports that they were tested in June of 2021 without giving the day and the survey date was 6/10/2021, then 6/5/2021 should be imputed.
+
+An individual should be considered positive for ARV biomarkers if any of the individual biomarkers are positive.
+
+An individual should be considered treated if the are positive for ARV biomarkers.Additionally, if any of the individual biomarkers are missing, the individual should be considered treated if they self-report ARV use.
+
+An individual should be considered undiagnosed if they are not treated and do not self-report a previous diagnosis.
 
 # Pre-Analysis
 
@@ -41,22 +44,23 @@ The Lag-Avidity Assay is known to have high false positive rates in treated and 
 
 There are two algorithms that can be used in a modern study. The “Treatment RITA” automatically classifies all elite controller and ART biomarker positive individuals as non-recent. The “Diagnosis RITA” classifies all previously diagnosed and elite controllers as non-recent.
 
-All of the following must be true to be classified as recent (Treatment RITA):
+All of the following must be true to be classified as recent (RITA2):
+
 1. HIV Positive
 2. Viral Load >1000 c/ml
-3. No ART Biomarkers
+3. Untreated.
 4. LAg-Avidity ODn > 1.5
 
-All of the following must be true to be classified as recent (Diagnosis RITA):
+All of the following must be true to be classified as recent (RITA3):
+
 1. HIV Positive
 2. Viral Load > 1000 c/ml
-3. No ART Biomarkers
-4. No Previous Diagnosis
+3. Undiagnosed
 5. LAg-Avidity ODn > 1.5
 
-We call a subject RITA recent if all conditions of the RITA are met. We call an individual screened in if all of the non-LAg-Avidity conditions are met (i.e. they are untreated for the Treatment RITA or undiagnosed for the Diagnosis RITA).
+We call a subject RITA recent if all conditions of the RITA are met. We call an individual screened in if all of the non-LAg-Avidity conditions are met.
 
-Some older studies have used only viral load with no ART biomarkers to screen out treated individuals. We do not recommend this for studies going forward.
+Some older studies have used only viral load with no ART biomarkers to screen out treated individuals (RITA1). We do not recommend this for studies going forward.
 
 The Treatment RITA has been used successfully in the past; however, using this RITA with the most up-to-date statistical methodology requires an additional external parameter curve representing the distribution of time from diagnosis to treatment.
 
@@ -68,8 +72,21 @@ Information about the assay’s test performance is introduced through the refer
 2. **Reference False Recency Rate (FRR, beta):** The rate that long-term screened in individuals in the population that test recent on the assay.
 3. **Test Performance Curve (q(t)):** A curve that specifies, at each time since seroconversion up until tau, the probability that a screened in individual will test recent on the assay.
 
-2 years is often used as a parameter value for tau. Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.
+Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.
 
-For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. (2022), which is based on data from [TODO add citation]. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [TODO: cite], who reported a reference false recency rate of 0.55%.
+For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2]. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [TODO: cite], who reported a reference false recency rate of 0.55%.
+
+The tau parameter should be the same as the cut-off that was used to define 'long-term' in the reference study used to specify the reference FRR parameter. 2 years was used in [2]. 
+
+
+[1] Ian E. Fellows, Wolfgang Hladik, Jeffrey W. Eaton, Andrew C. Voetsch, Bharat S. Parekh and Ray W. Shiraishi "Improving Biomarker Based HIV Incidence Estimation in the Treatment Era." arXiv preprint  (2022).
+
+[2] Yen T Duong, Reshma Kassanjee, Alex Welte, Meade Morgan, Anindya De, Trudy
+Dobbs, Erin Rottinghaus, John Nkengasong, Marcel E Curlin, Chonticha Kitti-
+nunvorakoon, et al. Recalibration of the limiting antigen avidity eia to deter-
+mine mean duration of recent infection in divergent hiv-1 subtypes. PloS one,
+10(2):e0114947, 2015
+
+[3] Li Yu, Oliver Laeyendecker, Sarah K Wendel, Fuxiong Liang, Wei Liu, Xueyan Wang, Lu Wang, Xianwu Pang, and Zhongliao Fang. Low false recent rate of limiting-antigen avidity assay among long-term infected subjects from guangxi, china. AIDS research and human retroviruses, 31(12):1247–1249, 2015.17
 
 

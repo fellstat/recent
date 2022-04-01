@@ -78,11 +78,6 @@
 </h2>
 <p>Data must be collected in the context of a population representative cross-sectional survey. This could be a simple random sample, but is more often a more complex survey design whose analysis involves the use of survey weights.</p>
 <div class="section level3">
-<h3 id="power">Power<a class="anchor" aria-label="anchor" href="#power"></a>
-</h3>
-<p>Obtaining precise incidence estimates typically requires significant sample sizes. We recommend using this [TODO: Add Link] tool for determining the appropriate sample size.</p>
-</div>
-<div class="section level3">
 <h3 id="data-collection">Data Collection<a class="anchor" aria-label="anchor" href="#data-collection"></a>
 </h3>
 <p>Incidence estimation requires the following data elements:</p>
@@ -92,11 +87,13 @@
 <li>
 <strong>Lag-Avidity Assay:</strong> A binary variable indicating “recent” if ODn &lt; 1.5 and “non-recent” if ODn&gt;=1.5. This should be collected for all HIV+ individuals.</li>
 <li>
-<strong>Anti-Retroviral Therapy (ART) biomarkers:</strong> A binary variable distinguishing those currently on ART from those that are not [TODO: Discuss which tests to use]. This should be collected for all HIV+ individuals.</li>
+<strong>Anti-Retroviral Therapy (ARV) biomarkers:</strong> A binary variable distinguishing those currently on ART from those that are not. The biomarkers should cover all types of therapies in use in the population. This should be collected for all HIV+ individuals.</li>
 <li>
-<strong>Viral Load:</strong> The viral load in copies per milliliter [TODO: ??].</li>
+<strong>Viral Load:</strong> The viral load in copies per milliliter.</li>
 <li>
 <strong>Self-Reported Previous Diagnosis:</strong> A binary variable indicating whether each individual reports having had a previous positive HIV test. This should be collected for all subjects.</li>
+<li>
+<strong>Self-Reported Treatment Status:</strong> A binary variable indicating whether the individual reports being on ARV therapy.</li>
 <li>
 <strong>Date of Last HIV Test:</strong> The day, month and year of each individual’s last HIV test should be collected.</li>
 <li>
@@ -104,10 +101,13 @@
 </ol>
 </div>
 <div class="section level3">
-<h3 id="missing-data">Missing Data<a class="anchor" aria-label="anchor" href="#missing-data"></a>
+<h3 id="missing-data-and-variable-construction">Missing Data and Variable Construction<a class="anchor" aria-label="anchor" href="#missing-data-and-variable-construction"></a>
 </h3>
 <p>The amount of missing data should be minimized. This is especially true for elements 1-5, which are critical for the RITA algorithm. The software can handle missing data, but any missing data will reduce power and can potentially introduce biases.</p>
 <p>Individuals may not recall the exact day of their last HIV test, or if the test was long ago, they may not recall the month either. In these cases it is recommended that the midpoint of the time interval is imputed. For example, if the month is missing, June might be imputed. If the day of the month is missing, 15 may be imputed. If the potential period overlaps the survey date, impute the midpoint between the start of the period and the survey date. For example, if a subject only reports a test year of 2021 and the survey data was collected on 1/30/2021, then 1/15/2021 should be imputed for the test date. If the subject reports that they were tested in June of 2021 without giving the day and the survey date was 6/10/2021, then 6/5/2021 should be imputed.</p>
+<p>An individual should be considered positive for ARV biomarkers if any of the individual biomarkers are positive.</p>
+<p>An individual should be considered treated if the are positive for ARV biomarkers.Additionally, if any of the individual biomarkers are missing, the individual should be considered treated if they self-report ARV use.</p>
+<p>An individual should be considered undiagnosed if they are not treated and do not self-report a previous diagnosis.</p>
 </div>
 </div>
 <div class="section level2">
@@ -118,10 +118,22 @@
 </h3>
 <p>The Lag-Avidity Assay is known to have high false positive rates in treated and elite controller individuals. As such, it is imperative that a screening step be introduced to prevent these individuals from being classified as recent. This is known as a recent infection testing algorithm (RITA).</p>
 <p>There are two algorithms that can be used in a modern study. The “Treatment RITA” automatically classifies all elite controller and ART biomarker positive individuals as non-recent. The “Diagnosis RITA” classifies all previously diagnosed and elite controllers as non-recent.</p>
-<p>All of the following must be true to be classified as recent (Treatment RITA): 1. HIV Positive 2. Viral Load &gt;1000 c/ml 3. No ART Biomarkers 4. LAg-Avidity ODn &gt; 1.5</p>
-<p>All of the following must be true to be classified as recent (Diagnosis RITA): 1. HIV Positive 2. Viral Load &gt; 1000 c/ml 3. No ART Biomarkers 4. No Previous Diagnosis 5. LAg-Avidity ODn &gt; 1.5</p>
-<p>We call a subject RITA recent if all conditions of the RITA are met. We call an individual screened in if all of the non-LAg-Avidity conditions are met (i.e. they are untreated for the Treatment RITA or undiagnosed for the Diagnosis RITA).</p>
-<p>Some older studies have used only viral load with no ART biomarkers to screen out treated individuals. We do not recommend this for studies going forward.</p>
+<p>All of the following must be true to be classified as recent (RITA2):</p>
+<ol style="list-style-type: decimal">
+<li>HIV Positive</li>
+<li>Viral Load &gt;1000 c/ml</li>
+<li>Untreated.</li>
+<li>LAg-Avidity ODn &gt; 1.5</li>
+</ol>
+<p>All of the following must be true to be classified as recent (RITA3):</p>
+<ol style="list-style-type: decimal">
+<li>HIV Positive</li>
+<li>Viral Load &gt; 1000 c/ml</li>
+<li>Undiagnosed</li>
+<li>LAg-Avidity ODn &gt; 1.5</li>
+</ol>
+<p>We call a subject RITA recent if all conditions of the RITA are met. We call an individual screened in if all of the non-LAg-Avidity conditions are met.</p>
+<p>Some older studies have used only viral load with no ART biomarkers to screen out treated individuals (RITA1). We do not recommend this for studies going forward.</p>
 <p>The Treatment RITA has been used successfully in the past; however, using this RITA with the most up-to-date statistical methodology requires an additional external parameter curve representing the distribution of time from diagnosis to treatment.</p>
 </div>
 <div class="section level3">
@@ -136,8 +148,12 @@
 <li>
 <strong>Test Performance Curve (q(t)):</strong> A curve that specifies, at each time since seroconversion up until tau, the probability that a screened in individual will test recent on the assay.</li>
 </ol>
-<p>2 years is often used as a parameter value for tau. Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.</p>
-<p>For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. (2022), which is based on data from [TODO add citation]. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [TODO: cite], who reported a reference false recency rate of 0.55%.</p>
+<p>Reference FRR and q(t) are usually determined from a reference study in a population with known times since seroconversion. In order to match the screened in study population, these studies should have been performed in non-elite controller, untreated and populations. Additionally, it is reasonable in many populations to assume that individuals who progress to AIDS will be diagnosed due to the presentation of symptoms. Under this assumption the reference population should also be non-AIDS progressed.</p>
+<p>For the LAg-Avidity assay, we recommend the use of the q(t) curve from Fellows et. al. [1], which is based on data from [2]. For reference FRR, the only study we are aware of that was conducted in a non-elite controller, untreated, non-AIDS population was [TODO: cite], who reported a reference false recency rate of 0.55%.</p>
+<p>The tau parameter should be the same as the cut-off that was used to define ‘long-term’ in the reference study used to specify the reference FRR parameter. 2 years was used in [2].</p>
+<p>[1] Ian E. Fellows, Wolfgang Hladik, Jeffrey W. Eaton, Andrew C. Voetsch, Bharat S. Parekh and Ray W. Shiraishi “Improving Biomarker Based HIV Incidence Estimation in the Treatment Era.” arXiv preprint (2022).</p>
+<p>[2] Yen T Duong, Reshma Kassanjee, Alex Welte, Meade Morgan, Anindya De, Trudy Dobbs, Erin Rottinghaus, John Nkengasong, Marcel E Curlin, Chonticha Kitti- nunvorakoon, et al. Recalibration of the limiting antigen avidity eia to deter- mine mean duration of recent infection in divergent hiv-1 subtypes. PloS one, 10(2):e0114947, 2015</p>
+<p>[3] Li Yu, Oliver Laeyendecker, Sarah K Wendel, Fuxiong Liang, Wei Liu, Xueyan Wang, Lu Wang, Xianwu Pang, and Zhongliao Fang. Low false recent rate of limiting-antigen avidity assay among long-term infected subjects from guangxi, china. AIDS research and human retroviruses, 31(12):1247–1249, 2015.17</p>
 </div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

@@ -15,6 +15,18 @@
 #' @param diag_surv time to diagnosis survival function vector. If specified, overrides the internal calculation.
 #' @param treated A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.
 #' @param treat_surv Probability an individual diagnosed i days ago is not on treatment.
+#' @details
+#' This function estimates HIV incidence for cross-sectional survey designs using a recency assay
+#' combined with a Recent Infection Testing Algorithm (RITA) screening step, which is used to
+#' remove long-term individuals with elevated false recency rates on the assay. Two RITA algorithms
+#' are supported.
+#' RITA3 treats all individuals with either a previous diagnosis (as determined by self report or ARV biomarkers) or
+#' a viral load <1,000 c/ml as non-recent regardless of the result of the recency assay. RITA2
+#' treats all individuals who are either on treatment or have a viral load <1,000 c/ml as
+#' non-recent.
+#' The default RITA is RITA3. If 'treated' is non-null, RITA2 will be used. RITA2 also requires
+#' a vector 'treat_surv' whose ith element represents the probability that an individual
+#' diagnosed i days ago is not on treatment.
 #' @returns
 #' A data.frame with the following values:
 #'

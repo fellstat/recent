@@ -61,7 +61,9 @@
   frr <span class="op">=</span> <span class="fu"><a href="lag_avidity_frr.html">lag_avidity_frr</a></span><span class="op">(</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>,
   test_history_population <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"undiagnosed"</span>, <span class="st">"negative"</span><span class="op">)</span>,
   assay_surv <span class="op">=</span> <span class="fu"><a href="lag_avidity_survival.html">lag_avidity_survival</a></span><span class="op">(</span><span class="va">tau</span> <span class="op">*</span> <span class="fl">365</span><span class="op">)</span>,
-  diag_surv <span class="op">=</span> <span class="cn">NULL</span>
+  diag_surv <span class="op">=</span> <span class="cn">NULL</span>,
+  treated <span class="op">=</span> <span class="cn">NULL</span>,
+  treat_surv <span class="op">=</span> <span class="cn">NULL</span>
 <span class="op">)</span></code></pre></div>
     </div>
 
@@ -91,6 +93,10 @@
 <dd><p>Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.</p></dd>
 <dt>diag_surv</dt>
 <dd><p>time to diagnosis survival function vector. If specified, overrides the internal calculation.</p></dd>
+<dt>treated</dt>
+<dd><p>A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.</p></dd>
+<dt>treat_surv</dt>
+<dd><p>Probability an individual diagnosed i days ago is not on treatment.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -101,6 +107,20 @@
 4. `P(R|S)` : The proportion of screened in individual who test recent.
 5. `P(S|H)` : The proportion of HIV+ individuals that are screened in.
 6. `P(H)` : HIV prevalence.</p>
+    </div>
+    <div class="section level2">
+    <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
+    <p>This function estimates HIV incidence for cross-sectional survey designs using a recency assay
+combined with a Recent Infection Testing Algorithm (RITA) screening step, which is used to
+remove long-term individuals with elevated false recency rates on the assay. Two RITA algorithms
+are supported.
+RITA3 treats all individuals with either a previous diagnosis (as determined by self report or ARV biomarkers) or
+a viral load &lt;1,000 c/ml as non-recent regardless of the result of the recency assay. RITA2
+treats all individuals who are either on treatment or have a viral load &lt;1,000 c/ml as
+non-recent.
+The default RITA is RITA3. If 'treated' is non-null, RITA2 will be used. RITA2 also requires
+a vector 'treat_surv' whose ith element represents the probability that an individual
+diagnosed i days ago is not on treatment.</p>
     </div>
 
     <div class="section level2">
@@ -117,6 +137,29 @@
 <span class="r-in"><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    incidence residual_frr  omega_rs  omega_s     P(R|S)   P(S|H)      P(H)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.01515732 0.0008826826 0.2921342 1.093136 0.07283305 0.195313 0.2480427</span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># RITA2 Screening</span></span>
+<span class="r-in"><span class="co">## Posit an average time from diagnosis to treatment of 150 days</span></span>
+<span class="r-in"><span class="va">treat_surv</span> <span class="op">&lt;-</span> <span class="fl">1</span> <span class="op">-</span> <span class="fu"><a href="https://rdrr.io/r/stats/Exponential.html" class="external-link">pexp</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="op">(</span><span class="fl">365</span><span class="op">*</span><span class="fl">2</span><span class="op">)</span>, <span class="fl">1</span><span class="op">/</span><span class="fl">150</span><span class="op">)</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co">## Create a dummy variable for treatment</span></span>
+<span class="r-in"><span class="va">assay_data</span><span class="op">$</span><span class="va">treated</span> <span class="op">&lt;-</span> <span class="op">!</span><span class="va">assay_data</span><span class="op">$</span><span class="va">undiagnosed</span></span>
+<span class="r-in"><span class="va">assay_data</span><span class="op">$</span><span class="va">treated</span><span class="op">[</span><span class="va">assay_data</span><span class="op">$</span><span class="va">undiagnosed</span><span class="op">]</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">40L</span>, <span class="fl">47L</span>, <span class="fl">59L</span>, <span class="fl">63L</span>, <span class="fl">83L</span>, <span class="fl">157L</span>, <span class="fl">164L</span>, <span class="fl">166L</span>, <span class="fl">194L</span>, <span class="fl">209L</span><span class="op">)</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="cn">FALSE</span></span>
+<span class="r-in"></span>
+<span class="r-in"><span class="co"># Calculate incidence using RITA2 screening (i.e. screen as non-recent if either treated or low viral load)</span></span>
+<span class="r-in"><span class="fu">rita_incidence</span><span class="op">(</span></span>
+<span class="r-in">recent<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">recent</span>,</span>
+<span class="r-in">undiagnosed<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">undiagnosed</span>,</span>
+<span class="r-in">low_viral<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">elite_cntr</span>,</span>
+<span class="r-in">hiv<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">hiv</span>,</span>
+<span class="r-in">weights<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">weights</span>,</span>
+<span class="r-in">tslt<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">tslt</span>,</span>
+<span class="r-in">ever_hiv_test<span class="op">=</span><span class="va">assay_data</span><span class="op">$</span><span class="va">ever_hiv_test</span>,</span>
+<span class="r-in">treated <span class="op">=</span> <span class="va">assay_data</span><span class="op">$</span><span class="va">treated</span>,</span>
+<span class="r-in">treat_surv <span class="op">=</span> <span class="va">treat_surv</span></span>
+<span class="r-in"><span class="op">)</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    incidence residual_frr omega_rs  omega_s     P(R|S)   P(S|H)      P(H)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.01319826 0.0008520468 0.335939 1.335463 0.07283305 0.195313 0.2480427</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
