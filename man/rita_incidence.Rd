@@ -94,7 +94,8 @@ treat_surv <- 1 - pexp(1:(365*2), 1/150)
 
 ## Create a dummy variable for treatment
 assay_data$treated <- !assay_data$undiagnosed
-assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
+assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L,
+    83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
 
 # Calculate incidence using RITA2 screening (i.e. screen as non-recent if either treated or low viral load)
 rita_incidence(

@@ -4,8 +4,8 @@ pkgdown_sha: ~
 articles:
   design_and_data: design_and_data.html
   introduction: introduction.html
-last_built: 2022-04-01T19:25Z
+last_built: 2022-04-01T20:30Z
 urls:
-  reference: https://fellstat.github.io/rita/reference
-  article: https://fellstat.github.io/rita/articles
+  reference: https://fellstat.github.io/recent/reference
+  article: https://fellstat.github.io/recent/articles
 

@@ -1,4 +1,4 @@
-Package: rita
+Package: recent
 Type: Package
 Title: Incidence Estimation Using Recency Assays
 Version: 0.1.0
@@ -28,4 +28,4 @@ Imports:
     progress,
     survey
 VignetteBuilder: knitr
-URL: https://fellstat.github.io/rita/
+URL: https://fellstat.github.io/recent/

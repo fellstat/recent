@@ -1,54 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://fellstat.github.io/rita/404.html</loc>
+    <loc>https://fellstat.github.io/recent/404.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/LICENSE-text.html</loc>
+    <loc>https://fellstat.github.io/recent/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/articles/design_and_data.html</loc>
+    <loc>https://fellstat.github.io/recent/articles/design_and_data.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/articles/index.html</loc>
+    <loc>https://fellstat.github.io/recent/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/articles/introduction.html</loc>
+    <loc>https://fellstat.github.io/recent/articles/introduction.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/authors.html</loc>
+    <loc>https://fellstat.github.io/recent/authors.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/index.html</loc>
+    <loc>https://fellstat.github.io/recent/index.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/aids_survival.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/aids_survival.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/apply_time_to_treatment.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/apply_time_to_treatment.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/assay_data.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/assay_data.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/diagnosis_survival.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/diagnosis_survival.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/index.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/lag_avidity_frr.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/lag_avidity_frr.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/lag_avidity_survival.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/lag_avidity_survival.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/rita_bootstrap.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/rita_bootstrap.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/rita_incidence.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/rita_incidence.html</loc>
   </url>
   <url>
-    <loc>https://fellstat.github.io/rita/reference/shiny_rita.html</loc>
+    <loc>https://fellstat.github.io/recent/reference/shiny_rita.html</loc>
   </url>
 </urlset>

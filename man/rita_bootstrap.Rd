@@ -2,7 +2,7 @@
 % Please edit documentation in R/incidence.R
 \name{rita_bootstrap}
 \alias{rita_bootstrap}
-\title{Survey bootstrap}
+\title{Assay Based Incidence Estimation With Survey Bootstrap Intervals}
 \usage{
 rita_bootstrap(
   recent,
@@ -80,7 +80,7 @@ Rows are defined by:
 6. `P(H)` : HIV prevalence.
 }
 \description{
-Survey bootstrap
+Assay Based Incidence Estimation With Survey Bootstrap Intervals
 }
 \examples{
 data("assay_data")

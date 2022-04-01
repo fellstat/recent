@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 The package includes example data, which we will be using in this vignette. 
 
 ```{r setup}
-library(rita)
+library(recent)
 data("assay_data")
 head(assay_data[1:7])
 ```

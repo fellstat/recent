@@ -151,7 +151,7 @@ rita_incidence <- function(
 }
 
 
-#' Survey bootstrap
+#' Assay Based Incidence Estimation With Survey Bootstrap Intervals
 #' @param recent Logical. Tests recent on assay.
 #' @param undiagnosed Logical. No previous diagnosis.
 #' @param low_viral Logical.  Has low viral load (< 1000).
