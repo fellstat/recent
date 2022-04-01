@@ -14,7 +14,7 @@
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
 #' @param diag_surv time to diagnosis survival function vector. If specified, overrides the internal calculation.
 #' @param treated A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.
-#' @param treat_surv probability an individual diagnosed i days ago is not on treatment.
+#' @param treat_surv Probability an individual diagnosed i days ago is not on treatment.
 #' @returns
 #' A data.frame with the following values:
 #'
@@ -42,7 +42,7 @@
 #' treat_surv <- 1 - pexp(1:(365*2), 1/150)
 #'
 #' ## Create a dummy variable for treatment
-#' assay_data$treated <- assay_data$undiagnosed
+#' assay_data$treated <- !assay_data$undiagnosed
 #' assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
 #'
 #' # Calculate incidence using RITA2 screening (i.e. screen as non-recent if either treated or low viral load)
@@ -99,6 +99,8 @@ rita_incidence <- function(
   if(!is.null(treated)){
     if(length(treated) != length(undiagnosed))
       stop("length(treated) != length(undiagnosed)")
+    if(any(treated[undiagnosed]))
+      stop("Undiagnosed individuals cannot be on treatment")
     diag_treat_surv <- apply_time_to_treatment(diag_surv, treat_surv)
     omega_s <- sum(diag_treat_surv[1:tau_days]) / 365
     omega <- sum(assay_surv[1:tau_days] * diag_treat_surv[1:tau_days]) / 365
@@ -149,6 +151,8 @@ rita_incidence <- function(
 #' @param test_history_population If undiagnosed, the testing histories of undiagnosed HIV+ people are used. If negative, the HIV- population is used.
 #' @param assay_surv Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.
 #' @param diag_surv time to diagnosis survival function vector.
+#' @param treated A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.
+#' @param treat_surv Probability an individual diagnosed i days ago is not on treatment.
 #' @param rep_weights A data.frame of replicate weights. See survey::svrrepdesign
 #' @param rep_weight_type The type of resampling weights. See svrepdesign.
 #' @param combined_weights TRUE if the rep_weights already include the sampling weights. This is usually the case.

@@ -1,16 +1,26 @@
+req <- function(pkg){
+  r <- require(pkg, character.only = TRUE)
+  if(!r){
+    install.packages(pkg)
+    library(pkg, character.only = TRUE)
+    return(2)
+  }
+  return(1)
+}
 
-
-library(shiny)
-library(promises)
-library(future)
-library(ipc)
-plan(multisession)
-library(ggplot2)
-library(rita)
-library(survey)
+req("shiny")
+#req("promises")
+#req("future")
+# future::plan(future::multisession)
+#req("ipc")
+req("ggplot2")
+req("rita")
+req("survey")
+req("shinyhelper")
 options(shiny.maxRequestSize=300*1024^2)
 
 shinyServer(function(input, output, session) {
+  observe_helpers()
 
   get_raw_data <- reactive({
     inFile <- input$file1
@@ -22,7 +32,7 @@ shinyServer(function(input, output, session) {
     vars <- names(dat)
 
     for(name in c("hiv","recent","low_viral",
-                  "undiagnosed", "ever_test","last_test","weights","strata"))
+                  "undiagnosed", "ever_test","last_test","weights","strata","treated"))
       updateSelectizeInput(session, name, choices = c("Choose Variable"="",vars))
     updatePickerInput(session, "rep_weights", choices = vars)
     dat
@@ -100,6 +110,10 @@ shinyServer(function(input, output, session) {
     get_numeric("last_test")
   })
 
+  get_treated <-  reactive({
+    get_logical("treated")
+  })
+
   get_rep_weights <- reactive({
     dat <- get_raw_data()
     rw_names <- input$rep_weights
@@ -156,7 +170,7 @@ shinyServer(function(input, output, session) {
     lt <- na.omit(lt)
     if(any(lt <= 0))
       txt <- paste(txt, "Error: Last HIV test values <= 0 detected",sep="\n")
-    if(any(lt > 35 * 12))
+    if(any(lt > 35 * 365))
       txt <- paste(txt, "Error: Last HIV test values > 35 years ago",sep="\n")
     txt
   })
@@ -179,6 +193,9 @@ shinyServer(function(input, output, session) {
   output$strata_desc <- render_table("strata")
   output$strata_desc_raw <- render_raw_table("strata")
 
+  output$treated_desc <- render_table("treated")
+  output$treated_desc_raw <- render_raw_table("treated")
+
   incidence <- reactiveVal()
   nclicks <- reactiveVal(0)
   output$inc_results <- renderTable({
@@ -191,6 +208,9 @@ shinyServer(function(input, output, session) {
     hiv <- get_hiv()
     last_test <- get_last_test()
     ever_test <- get_ever_test()
+    treated <- get_treated()
+    if(input$rita_type != "Treatment + Viral Load (RITA2)")
+      treated <- NULL
 
     strata <- get_strata()
 
@@ -217,6 +237,12 @@ shinyServer(function(input, output, session) {
     tau <- input$tau
     frr <- input$frr
     test_history_population <- input$test_history_population
+    median_ttt <- input$median_ttt * 365
+    if(is.na(median_ttt) && !is.null(treated)){
+      stop("Please specify a median time to treatment")
+    }
+    lambda <- log(2) / median_ttt
+    treat_surv <- 1 - pexp(1:ceiling(365*tau), lambda)
     inc <- list()
     if(is.null(strata)){
       inc[["all"]] <- rita_incidence(recent=recent,
@@ -228,7 +254,9 @@ shinyServer(function(input, output, session) {
                                         weights=weights,
                                         tau=tau,
                                         frr=frr,
-                                        test_history_population=test_history_population
+                                        test_history_population=test_history_population,
+                                     treated = treated,
+                                     treat_surv = treat_surv
                       )
       result <- inc[[1]]
 
@@ -244,7 +272,9 @@ shinyServer(function(input, output, session) {
                                     weights=weights[strata == lv],
                                     tau=tau,
                                     frr=frr,
-                                    test_history_population=test_history_population
+                                    test_history_population=test_history_population,
+                                    treated = treated[strata == lv],
+                                    treat_surv = treat_surv
                         ))
       }
       result <- inc
@@ -289,6 +319,9 @@ shinyServer(function(input, output, session) {
     hiv <- get_hiv()
     last_test <- get_last_test()
     ever_test <- get_ever_test()
+    treated <- get_treated()
+    if(input$rita_type != "Treatment + Viral Load (RITA2)")
+      treated <- NULL
 
     strata <- get_strata()
 
@@ -316,6 +349,12 @@ shinyServer(function(input, output, session) {
     frr <- input$frr
     test_history_population <- input$test_history_population
     type <- input$type
+    median_ttt <- input$median_ttt * 365
+    if(is.na(median_ttt) && !is.null(treated)){
+      stop("Please specify a median time to treatment")
+    }
+    lambda <- log(2) / median_ttt
+    treat_surv <- 1 - pexp(1:ceiling(365*tau), lambda)
     #progress <- AsyncProgress$new(message="Generating Boostrap Samples")
     prog <- function(i, strata, nstrata){
       interruptor$execInterrupts()
@@ -336,6 +375,8 @@ shinyServer(function(input, output, session) {
                                      rep_weights = rep_weights,
                                      rep_weight_type = type,
                                      test_history_population=test_history_population,
+                                     treated = treated,
+                                     treat_surv = treat_surv,
                                      show_progress = callback
       )
       inc[[1]] <- cbind(
@@ -362,6 +403,8 @@ shinyServer(function(input, output, session) {
                                         rep_weights = rep_weights[strata == lv,],
                                         rep_weight_type = type,
                                         test_history_population=test_history_population,
+                                        treated = treated[strata == lv],
+                                        treat_surv = treat_surv,
                                         show_progress = callback
         ))
         inc[[lv]] <- cbind(
@@ -424,12 +467,21 @@ shinyServer(function(input, output, session) {
     NULL
   })
   output$bootstrap <- renderTable({
-    req(boot_result())
+    shiny::req(boot_result())
   },digits=4)
 
   observeEvent(input$cancel,{
     print("cancel")
     interruptor$interrupt("User Interrupt")
   })
+
+  output$download_example <- downloadHandler(
+    filename = "assay_data.csv",
+    content = function(file) {
+      #loc <- paste0(system.file("shiny_ui", package = "rita"),"/assay_data.csv")
+      loc <- "/usr/local/lib/R/site-library/rita/shiny_ui/assay_data.csv"
+      file.copy(loc, file)
+    }
+  )
 
 })

@@ -44,7 +44,7 @@ plot(diag_treat_surv, type="l")
 points(diag_surv, type="l",col="red")
 
 #Create a dummy variable for treatment
-assay_data$treated <- assay_data$undiagnosed
+assay_data$treated <- !assay_data$undiagnosed
 
 #Calculate incidence
 rita_incidence(

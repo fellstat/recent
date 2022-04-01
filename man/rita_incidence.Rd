@@ -16,7 +16,9 @@ rita_incidence(
   frr = lag_avidity_frr()[1],
   test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
-  diag_surv = NULL
+  diag_surv = NULL,
+  treated = NULL,
+  treat_surv = NULL
 )
 }
 \arguments{
@@ -43,6 +45,10 @@ rita_incidence(
 \item{assay_surv}{Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.}
 
 \item{diag_surv}{time to diagnosis survival function vector. If specified, overrides the internal calculation.}
+
+\item{treated}{A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.}
+
+\item{treat_surv}{Probability an individual diagnosed i days ago is not on treatment.}
 }
 \value{
 A data.frame with the following values:
@@ -67,5 +73,26 @@ hiv=assay_data$hiv,
 weights=assay_data$weights,
 tslt=assay_data$tslt,
 ever_hiv_test=assay_data$ever_hiv_test
+)
+
+# RITA2 Screening
+## Posit an average time from diagnosis to treatment of 150 days
+treat_surv <- 1 - pexp(1:(365*2), 1/150)
+
+## Create a dummy variable for treatment
+assay_data$treated <- !assay_data$undiagnosed
+assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <- FALSE
+
+# Calculate incidence using RITA2 screening (i.e. screen as non-recent if either treated or low viral load)
+rita_incidence(
+recent=assay_data$recent,
+undiagnosed=assay_data$undiagnosed,
+low_viral=assay_data$elite_cntr,
+hiv=assay_data$hiv,
+weights=assay_data$weights,
+tslt=assay_data$tslt,
+ever_hiv_test=assay_data$ever_hiv_test,
+treated = assay_data$treated,
+treat_surv = treat_surv
 )
 }

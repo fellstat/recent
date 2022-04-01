@@ -20,6 +20,8 @@ rita_bootstrap(
   test_history_population = c("undiagnosed", "negative"),
   assay_surv = lag_avidity_survival(tau * 365),
   diag_surv = NULL,
+  treated = NULL,
+  treat_surv = NULL,
   conf_level = 0.95,
   show_progress = TRUE,
   ...
@@ -55,6 +57,10 @@ rita_bootstrap(
 \item{assay_surv}{Survival function vector for assay among treatment naive non-elite controller non-AIDS individuals.}
 
 \item{diag_surv}{time to diagnosis survival function vector.}
+
+\item{treated}{A logical vector indicating a subject is on treatment. Only needed in the case of the use of RITA2 screening.}
+
+\item{treat_surv}{Probability an individual diagnosed i days ago is not on treatment.}
 
 \item{conf_level}{confidence level for bootstrap interval.}
 

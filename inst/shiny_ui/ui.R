@@ -1,6 +1,20 @@
-library(shiny)
-library(shinyWidgets)
-# Define UI for application that draws a histogram
+req <- function(pkg){
+  r <- require(pkg, character.only = TRUE)
+  if(!r){
+    install.packages(pkg, character.only = TRUE)
+    library(pkg)
+    return(2)
+  }
+  return(1)
+}
+req("shiny")
+req("shinyhelper")
+req("shinyWidgets")
+
+shelp <- function(x, ...){
+  helper(x, ..., colour="lightgrey")
+}
+
 shinyUI(
   navbarPage('RITA Incidence',
              #tag$script(HTML("updateFirstMultiInput = function(x){ var event = new Event('input'); $('.multi-wrapper .search-input').get(0).dispatchEvent(event);};Shiny.addCustomMessageHandler('updateFirstMultiInput', updateFirstMultiInput);")),
@@ -9,6 +23,8 @@ shinyUI(
                       h4('Welcome to The RITA Incidence Estimator'),
                       br(),
                       p("The purpose of this tool is the estimation of incidence from a cross-sectional survey utilizing a recency assay."),
+                      br(),
+                      downloadLink("download_example", "Download Example Data"),
                       br(),
                       h5('Please proceed to the', em('Load Data'), 'tab')
              ),
@@ -28,22 +44,24 @@ shinyUI(
                             ),
                             conditionalPanel("output.table != null",
                                              selectizeInput("hiv", "HIV+:",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="hiv"),
                                              selectizeInput("undiagnosed", "Undiagnosed:",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="undiagnosed"),
                                              selectizeInput("ever_test", "Ever Had An HIV Test:",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="ever_test"),
                                              selectizeInput("low_viral", "Low/Undetectable Viral Load:",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="low_viral"),
                                              selectizeInput("recent", "Assay Recent:",
-                                                            c("")),
-                                             selectizeInput("last_test", "Time Since Last HIV Test (Years):",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="recent"),
+                                             selectizeInput("last_test", "Time Since Last HIV Test (Days):",
+                                                            c("")) %>% shelp(content="last_test"),
                                              selectizeInput("strata", "Stratify By (Optional):",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="strata"),
+                                             selectizeInput("treated", "Treated (Optional):",
+                                                            c("")) %>% shelp(content="treated"),
                                              tags$hr(),
                                              selectizeInput("weights", "Weights (Optional):",
-                                                            c("")),
+                                                            c("")) %>% shelp(content="weights"),
                                              pickerInput(inputId = "rep_weights",
                                                          label = "Replication Weights (Optional):",
                                                          choices = c(""),
@@ -51,7 +69,7 @@ shinyUI(
                                                          options = list(`actions-box` = TRUE,
                                                                         `live-search`=TRUE,
                                                                         `none-selected-text`="Choose Variable")
-                                             )
+                                             ) %>% shelp(content="rep_weights")
                             ),
                             width=5),
                           mainPanel(
@@ -97,6 +115,13 @@ shinyUI(
                                              p("Processed:"),
                                              tableOutput("strata_desc")
                             ),
+                            conditionalPanel("input.treated != \"\"",
+                                             h2("Treated Descriptives:"),
+                                             p("Raw Values:"),
+                                             tableOutput("treated_raw"),
+                                             p("Processed:"),
+                                             tableOutput("treated_desc")
+                            ),
                             conditionalPanel("input.last_test != \"\"",
                                              h2("Last Test Descriptives:"),
                                              plotOutput("last_test_plot", width = "100%", height = "200px"),
@@ -115,17 +140,29 @@ shinyUI(
                         # Sidebar with a slider input for number of bins
                         sidebarLayout(
                           sidebarPanel(
-                              numericInput("tau","Recency Period (tau)", min = 0, value = 2),
-                              numericInput("frr","Reference False Recency Rate (FRR)", min = 0, value =  .0055),
-                              selectizeInput("test_history_population", "Testing History Population", choices = c("undiagnosed","negative"), selected="undiagnosed"),
+                              numericInput("tau","Recency Period (tau)", min = 0, value = 2) %>% shelp(content="tau"),
+                              numericInput("frr","Reference False Recency Rate (FRR)", min = 0, value =  .0055) %>% shelp(content="frr"),
+                              selectizeInput("test_history_population", "Testing History Population", choices = c("undiagnosed","negative"), selected="undiagnosed") %>% shelp(content="test_history_population"),
+                              conditionalPanel("input.treated != \"\"",
+                                               selectInput(
+                                                 "rita_type",
+                                                 "RITA",
+                                                 c("Diagnosis + Viral Load (RITA3)", "Treatment + Viral Load (RITA2)"),
+                                                 "Diagnosis + Viral Load (RITA3)"
+                                               ) %>% shelp(content="rita_type"),
+                                               conditionalPanel("input.rita_type == \"Treatment + Viral Load (RITA2)\"",
+                                                                numericInput("median_ttt", "Median Time From Diagnosis to Treatment (Years)", min = 0, value = NA) %>% shelp(content="median_ttt")
+                                               )
+                              ),
                               h3("Bootstrap Confidence Intervals"),
                               selectInput("type",
                                           "Replicate Weight Type:",
                                           choices = c("Jackknife"="JK1","Bootstrap"="bootstrap","BRR", "Fay"),
                                           selected="JK1"
-                              ),
+                              ) %>% shelp(content="type"),
                               actionButton('run', 'Run'),
-                              actionButton('cancel', 'Cancel')
+                              #actionButton('cancel', 'Cancel'),
+                              width = 4
                           ),
                           mainPanel(
                             h3("Incidence Results"),
@@ -137,7 +174,8 @@ shinyUI(
                             conditionalPanel("(input.rep_weights == null) && (input.design_clusters == \"\") && (input.design_strata == \"\")",
                                              h3("Bootstrap Intervals")
                             ),
-                            tableOutput("bootstrap")
+                            tableOutput("bootstrap"),
+                            width = 8
                           )
                         )
                       )

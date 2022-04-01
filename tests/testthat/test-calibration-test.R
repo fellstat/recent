@@ -228,7 +228,7 @@ test_that("RITA2", {
   points(diag_surv, type = "l", col = "red")
 
   #Create a dummy variable for treatment
-  assay_data$treated <- assay_data$undiagnosed
+  assay_data$treated <- !assay_data$undiagnosed
   assay_data$treated[assay_data$undiagnosed][c(40L, 47L, 59L, 63L, 83L, 157L, 164L, 166L, 194L, 209L)] <-
     FALSE
 
@@ -258,20 +258,11 @@ test_that("RITA2", {
   )
   expect_identical(ri1, ri2)
 
-  ri1_ref <-
-    structure(
-      list(
-        incidence = 0.00383206717870841,
-        residual_frr = 0.000842313332886876,
-        omega_rs = 0.335938952038046,
-        omega_s = 1.33546256766089,
-        `P(R|S)` = 0.0287379226230863,
-        `P(S|H)` = 0.164430714369552,
-        `P(H)` = 0.24804274938758
-      ),
-      class = "data.frame",
-      row.names = c(NA,-1L)
-    )
+  ri1_ref <- structure(list(incidence = 0.0131982638444931, residual_frr = 0.000852046786268405,
+                           omega_rs = 0.335938952038046, omega_s = 1.33546256766089,
+                           `P(R|S)` = 0.0728330452132411, `P(S|H)` = 0.195313010675028,
+                           `P(H)` = 0.24804274938758), class = "data.frame", row.names = c(NA,
+                                                                                           -1L))
   expect_true(sum(abs(ri1 - ri1_ref)) < .000001)
 
   expect_warning(
