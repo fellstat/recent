@@ -11,17 +11,17 @@ Provides functions and methods to estimate incidence from a cross-sectional surv
 You can install from github using
 
 ``` r
-devtools::install_github("fellstat/rita")
+devtools::install_github("fellstat/recent")
 ```
 
 # Usage
 
-**[A brief tour of the package](https://fellstat.github.io/rita/articles/introduction.html)**
+**[A brief tour of the package](https://fellstat.github.io/recent/articles/introduction.html)**
 
 ## Example
 
 ``` r
-library(rita)
+library(recent)
 data(assay_recent)
 rita_incidence(
     recent=assay_data$recent,
