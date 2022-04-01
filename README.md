@@ -1,5 +1,5 @@
 
-# rita: Incidence Estimation Using Recency Assays
+# recent: Incidence Estimation Using Recency Assays
 
 <!-- badges: start -->
 <!-- badges: end -->
