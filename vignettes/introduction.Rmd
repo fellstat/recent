@@ -1,5 +1,5 @@
 ---
-title: "Gettign Started with the 'rita' Package"
+title: "Gettign Started with the 'recent' Package"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{introduction}
@@ -9,7 +9,7 @@ vignette: >
 
 # Introduction
 
-This package implements the methods of Fellows et. al. 2022 for the calculation of incidence using recency assays such as LAg-Avidity. Because treated individuals and elite controllers are known to ave high false positivity rates on recency assays, individuals with low viral load or a previous HIV+ diagnosis are screened out. A previous diagnosis can be indicated by either a self-reported previous positive test or through the detection of ARV antibodies.
+This package implements the methods of [Fellows et. al. 2022](https://arxiv.org/abs/2204.00048) for the calculation of incidence using recency assays such as LAg-Avidity. Because treated individuals and elite controllers are known to ave high false positivity rates on recency assays, individuals with low viral load or a previous HIV+ diagnosis are screened out. A previous diagnosis can be indicated by either a self-reported previous positive test or through the detection of ARV antibodies.
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(

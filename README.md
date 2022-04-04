@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-Provides functions and methods to estimate incidence from a cross-sectional survey. A Recent Infection Testing Algorithm (RITA) is used to identify likely recent infections and the methods of Fellows (2021) are used to calculate incidence based on the frequency of these likely recent infections.
+Provides functions and methods to estimate incidence from a cross-sectional survey. A Recent Infection Testing Algorithm (RITA) is used to identify likely recent infections and the methods of Fellows (2022) are used to calculate incidence based on the frequency of these likely recent infections.
 
 ## Installation
 
@@ -14,9 +14,17 @@ You can install from github using
 devtools::install_github("fellstat/recent")
 ```
 
-# Usage
+## Documentation 
 
 **[A brief tour of the package](https://fellstat.github.io/recent/articles/introduction.html)**
+
+**[Technical paper](https://arxiv.org/abs/2204.00048)**
+
+
+## Hosted User Interface
+
+**[Shiny web application](https://epiapps.com/shiny/app_direct/rita/)**
+
 
 ## Example
 
