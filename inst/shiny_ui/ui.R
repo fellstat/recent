@@ -88,7 +88,7 @@ shinyUI(
                                              tableOutput("undiagnosed_desc")
                             ),
                             conditionalPanel("input.ever_test != \"\"",
-                                             h2("Undiagnosed Descriptives:"),
+                                             h2("Ever Tested Descriptives:"),
                                              p("Raw Values:"),
                                              tableOutput("ever_test_desc_raw"),
                                              p("Processed:"),
