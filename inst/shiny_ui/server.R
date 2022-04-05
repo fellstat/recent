@@ -478,8 +478,8 @@ shinyServer(function(input, output, session) {
   output$download_example <- downloadHandler(
     filename = "assay_data.csv",
     content = function(file) {
-      #loc <- paste0(system.file("shiny_ui", package = "rita"),"/assay_data.csv")
-      loc <- "/usr/local/lib/R/site-library/rita/shiny_ui/assay_data.csv"
+      loc <- paste0(system.file("shiny_ui", package = "recent"),"/assay_data.csv")
+      #loc <- "/usr/local/lib/R/site-library/rita/shiny_ui/assay_data.csv"
       file.copy(loc, file)
     }
   )
