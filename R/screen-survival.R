@@ -26,10 +26,10 @@ diagnosis_survival <- function(
   hiv,
   weights,
   n = 365*5,
-  population = c("undiagnosed", "negative")){
+  population = c("undiagnosed", "undiagnosed_median", "negative")){
 
   population <- match.arg(population)
-  if(population == "undiagnosed"){
+  if(population %in% c("undiagnosed", "undiagnosed_median")){
     sub_pop <- undiagnosed
     sub_pop[!hiv] <- FALSE
   }else{
@@ -41,12 +41,45 @@ diagnosis_survival <- function(
      length(stats::na.omit(ever_hiv_test[sub_pop])) == 0)
     stop("diagnosis_survival: no non-missing testing histories")
 
-  tst_surv <- sapply(1:n, function(x){
-    sum((tslt[sub_pop] > x) * weights[sub_pop], na.rm=TRUE) /
-      sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
-  })
-  p_never_test <- sum((!ever_hiv_test[sub_pop]) * weights[sub_pop], na.rm=TRUE) /
-    sum((!is.na(ever_hiv_test[sub_pop])) * weights[sub_pop])
+  if(population == "undiagnosed"){
+    #weights2 <- weights * 1 / ifelse(is.na(tslt), Inf, tslt)
+    #m <-sum((tslt[sub_pop]) * weights[sub_pop], na.rm=TRUE) /
+    #  sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
+    #rate <- 2 / m
+    #tst_surv <- exp(-rate * (1:n))
+    mn <- wtd_mean(tslt[sub_pop], weights[sub_pop])
+    lambda_mn <- 2 / mn
+    tst_surv <- exp(-lambda_mn * (1:n))
+  }else if(population == "undiagnosed_median"){
+    #weights2 <- weights * 1 / ifelse(is.na(tslt), Inf, tslt)
+    #m <-sum((tslt[sub_pop]) * weights[sub_pop], na.rm=TRUE) /
+    #  sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
+    #rate <- 2 / m
+    #tst_surv <- exp(-rate * (1:n))
+    med <- wtd_median(tslt[sub_pop], weights[sub_pop])
+    lambda_med <- lam_from_median(med)
+    tst_surv <- exp(-lambda_med * (1:n))
+  }else{
+    #browser()
+    #tst_surv <- sapply(1:n, function(x){
+    #  sum((tslt[sub_pop] > x) * weights[sub_pop], na.rm=TRUE) /
+    #    sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
+    #})
+    #tst_surv <- sapply(1:n, function(x){
+    #  sum((tslt[sub_pop] > x) * weights[sub_pop], na.rm=TRUE)
+    #}) / sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
+    tst_surv <- rep(0, n)
+    tmp <- tapply(
+      weights[sub_pop & !is.na(tslt)],
+      round(tslt[sub_pop & !is.na(tslt)]), sum,na.rm=TRUE)
+    tmp <- tmp / sum(tmp)
+    tmp <- tmp[as.numeric(names(tmp)) <= n]
+    tst_surv[as.numeric(names(tmp))] <- tmp #/ sum((!is.na(tslt[sub_pop])) * weights[sub_pop])
+    tst_surv <- 1 - cumsum(tst_surv)
+  }
+  #p_never_test <- sum((!ever_hiv_test[sub_pop]) * weights[sub_pop], na.rm=TRUE) /
+  #  sum((!is.na(ever_hiv_test[sub_pop])) * weights[sub_pop])
+  p_never_test <- wtd_mean(!ever_hiv_test[!hiv], weights[!hiv])
   tst_surv <- 1 - (1 - tst_surv) * (1 - p_never_test)
 
   aids_surv <- aids_survival(length(tst_surv))
@@ -111,4 +144,22 @@ apply_time_to_treatment <- function(diag_surv, treat_surv){
     res[i:n] <- res[i:n] + diag_haz[i] * (1-treat_surv[1:(n - i + 1)])
   }
   1 + res
+}
+
+
+lam_from_median <- function(med){
+  f <- function(lambda) exp(-lambda * med) * (lambda * med + 1) - .5
+  stats::uniroot(f, lower=0, upper=1)$root
+}
+
+wtd_median <- function(x, weights){
+  df <- na.omit(data.frame(id = 1:length(x), x = x, weights=weights))
+  des <- survey::svydesign(id=~id, weights=~weights, data=df)
+  survey::svyquantile(~x, des, 0.5)$x[1]
+}
+
+wtd_mean <- function(x, weights){
+  df <- na.omit(data.frame(x = x, weights=weights))
+  df$weights <- df$weights / sum(df$weights)
+  sum(df$x * df$weights)
 }
